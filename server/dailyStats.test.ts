@@ -37,12 +37,21 @@ describe("getDailySnapshotCounts fallback", () => {
   });
 
   it("uses application aggregation when SQL date grouping rejects", async () => {
-    await expect(getDailySnapshotCounts(7)).resolves.toEqual([
-      { date: "2026-08-15", count: 1 },
-      { date: "2026-08-16", count: 2 },
-    ]);
-    expect(mocks.sqlOrderBy).toHaveBeenCalledOnce();
-    expect(mocks.fallbackOrderBy).toHaveBeenCalledOnce();
-    expect(mocks.select).toHaveBeenCalledTimes(2);
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      await expect(getDailySnapshotCounts(7)).resolves.toEqual([
+        { date: "2026-08-15", count: 1 },
+        { date: "2026-08-16", count: 2 },
+      ]);
+      expect(mocks.sqlOrderBy).toHaveBeenCalledOnce();
+      expect(mocks.fallbackOrderBy).toHaveBeenCalledOnce();
+      expect(mocks.select).toHaveBeenCalledTimes(2);
+      expect(warning).toHaveBeenCalledWith(
+        expect.stringContaining("Daily SQL aggregation failed"),
+        expect.any(Error),
+      );
+    } finally {
+      warning.mockRestore();
+    }
   });
 });

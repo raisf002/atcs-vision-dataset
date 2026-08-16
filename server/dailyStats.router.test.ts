@@ -37,6 +37,7 @@ describe("dataset.dailyStats integration", () => {
   });
 
   it("returns fallback rows to an authenticated client when SQL date grouping fails", async () => {
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const now = new Date();
     const caller = appRouter.createCaller({
       user: {
@@ -54,12 +55,20 @@ describe("dataset.dailyStats integration", () => {
       res: {} as TrpcContext["res"],
     });
 
-    await expect(caller.dataset.dailyStats({ days: 7 })).resolves.toEqual([
-      { date: "2026-08-15", count: 1 },
-      { date: "2026-08-16", count: 2 },
-    ]);
-    expect(mocks.sqlOrderBy).toHaveBeenCalledOnce();
-    expect(mocks.fallbackOrderBy).toHaveBeenCalledOnce();
-    expect(mocks.select).toHaveBeenCalledTimes(2);
+    try {
+      await expect(caller.dataset.dailyStats({ days: 7 })).resolves.toEqual([
+        { date: "2026-08-15", count: 1 },
+        { date: "2026-08-16", count: 2 },
+      ]);
+      expect(mocks.sqlOrderBy).toHaveBeenCalledOnce();
+      expect(mocks.fallbackOrderBy).toHaveBeenCalledOnce();
+      expect(mocks.select).toHaveBeenCalledTimes(2);
+      expect(warning).toHaveBeenCalledWith(
+        expect.stringContaining("Daily SQL aggregation failed"),
+        expect.any(Error),
+      );
+    } finally {
+      warning.mockRestore();
+    }
   });
 });
