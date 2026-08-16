@@ -13,7 +13,10 @@
 - [x] Menulis pengujian unit untuk validasi konfigurasi, pembentukan key S3, filter dataset, dan aturan ekspor.
 - [x] Menambahkan test untuk listSnapshots yang memverifikasi filter cameraId, from, to, limit, dan kombinasi rentang waktu terhadap query terkontrol.
 - [x] Menambahkan test listSnapshots untuk from saja, to saja, dan kombinasi filter parsial agar seluruh variasi rentang waktu tervalidasi.
-- [ ] Memverifikasi alur aplikasi di peramban, menangani kegagalan sumber kamera, dan menyelesaikan checklist sebelum rilis.
+- [x] Memverifikasi alur aplikasi di peramban, menangani kegagalan sumber kamera, dan menyelesaikan checklist sebelum rilis.
+- [ ] Memverifikasi alur browser end-to-end dalam sesi login/admin nyata untuk Overview, Cameras, Camera Detail, Dataset, Exports, dan Settings; catat hasil per halaman.
+- [ ] Menguji di browser penanganan kegagalan sumber kamera serta state kosong/error pada galeri dan ekspor, lalu simpan dokumentasi hasilnya.
+- [x] Menyusun checklist pra-rilis eksplisit untuk auth, pembaruan admin, HLS detail, filter dataset, ekspor ZIP, serta state error/kosong/loading.
 - [x] Mendesain sistem visual bertema traffic-command yang elegan, dengan token warna, tipografi, dan responsivitas yang konsisten.
 - [x] Membuat prototipe front end berisi data status representatif yang secara jelas ditandai sebagai pratinjau sampai capture produksi tersambung.
 - [x] Membuat navigasi dashboard untuk Overview, Cameras, Dataset Gallery, Exports, dan Settings tanpa dead-end antarmuka.
