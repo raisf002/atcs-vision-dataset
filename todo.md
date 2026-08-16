@@ -89,3 +89,5 @@
 - [x] Menyelaraskan label status sumber pada ringkasan dashboard dengan hasil capture HLS terbaru agar tidak menampilkan stream gagal sebagai sekadar terkonfigurasi.
 - [x] Menambahkan regresi rendering status ringkasan dashboard untuk capture berhasil, sumber HLS gagal, dan pipeline worker gagal.
 - [x] Menambahkan skenario DOM kamera capture berhasil agar label sumber terkonfigurasi pada ringkasan dashboard ikut terlindungi oleh regresi.
+- [x] Menambahkan konteks diagnostik dan tindakan pemulihan yang jelas pada detail CCTV ketika sumber HLS atau pipeline worker gagal.
+- [x] Menambahkan regresi detail CCTV untuk membedakan status sumber HLS gagal, pipeline gagal, dan capture berhasil.
