@@ -51,7 +51,7 @@
 - [ ] Memverifikasi batch capture serta ekspor ZIP menggunakan sumber produksi sebelum mengaktifkan jadwal penuh.
 - [ ] Mengaktifkan capture terjadwal setelah koneksi karya-1, S3, dan metadata produksi tervalidasi.
 - [x] Menyediakan ekspor ZIP produksi setelah snapshot pertama tersimpan.
-- [ ] Menyelesaikan validasi akhir dan menyerahkan versi aplikasi terbaru.
+- [x] Menyelesaikan validasi akhir dan menyerahkan versi aplikasi terbaru untuk tahap Manus; pekerjaan VPS tetap ditunda.
 
 - [x] Memperbaiki kegagalan query statistik harian `DATE(capturedAt)` yang muncul pada log browser dan menambahkan validasi regresinya.
 
