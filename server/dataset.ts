@@ -29,6 +29,7 @@ export async function updateCameraConfig(input: {
   sourceKind?: "hls" | "snapshot";
   sourceStatus?: "pending" | "verified" | "invalid";
   isActive?: boolean;
+  captureIntervalMinutes?: "1" | "5" | "10" | "15" | null;
 }) {
   await ensureDatasetFoundation();
   const db = await getDb();

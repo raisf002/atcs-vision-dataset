@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import DashboardLayout from "@/components/DashboardLayout";
 import Cameras from "@/pages/Cameras";
+import CameraDetail from "@/pages/CameraDetail";
 import DatasetGallery from "@/pages/DatasetGallery";
 import Exports from "@/pages/Exports";
 import NotFound from "@/pages/NotFound";
@@ -16,6 +17,7 @@ function Router() {
     <DashboardLayout demoMode>
       <Switch>
         <Route path={"/"} component={Home} />
+        <Route path={"/cameras/:cameraId"} component={CameraDetail} />
         <Route path={"/cameras"} component={Cameras} />
         <Route path={"/dataset"} component={DatasetGallery} />
         <Route path={"/exports"} component={Exports} />

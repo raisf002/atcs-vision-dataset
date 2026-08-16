@@ -1,0 +1,1 @@
+ALTER TABLE `cameras` ADD `captureIntervalMinutes` enum('1','5','10','15');

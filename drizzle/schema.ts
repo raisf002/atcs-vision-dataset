@@ -22,6 +22,7 @@ export const cameras = mysqlTable("cameras", {
   sourceKind: mysqlEnum("sourceKind", ["hls", "snapshot"]).default("hls").notNull(),
   sourceStatus: mysqlEnum("sourceStatus", ["pending", "verified", "invalid"]).default("pending").notNull(),
   isActive: boolean("isActive").default(false).notNull(),
+  captureIntervalMinutes: mysqlEnum("captureIntervalMinutes", ["1", "5", "10", "15"]),
   captureCount: bigint("captureCount", { mode: "number" }).default(0).notNull(),
   lastCaptureAt: timestamp("lastCaptureAt"),
   lastCaptureStatus: mysqlEnum("lastCaptureStatus", ["disabled", "pending", "success", "failed"]).default("disabled").notNull(),

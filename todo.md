@@ -22,3 +22,7 @@
 - [ ] Menyediakan konfigurasi rahasia worker dan dokumentasi koneksi server tanpa mengekspos kredensial di klien.
 - [ ] Menjalankan uji capture satu kamera lalu uji batch dengan pelaporan error per kamera.
 - [ ] Mengaktifkan kembali integrasi worker capture hanya jika pengguna secara eksplisit meminta otomasi snapshot produksi.
+- [x] Menambahkan halaman detail untuk setiap CCTV dengan pemutar HLS live dari URL sumber yang telah dipetakan.
+- [x] Menambahkan panel konfigurasi individual per CCTV untuk status aktif, interval capture, URL sumber, dan ringkasan dataset.
+- [x] Menyambungkan pemilihan kamera pada registry ke halaman detail CCTV tanpa dead-end navigasi.
+- [x] Menguji fallback pemutar HLS, loading stream, dan pengalaman detail CCTV di layar desktop serta seluler.

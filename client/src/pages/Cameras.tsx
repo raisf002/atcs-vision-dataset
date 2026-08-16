@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Camera, ChevronDown, Link2, Search, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Link } from "wouter";
 
 export default function Cameras() {
   const [query, setQuery] = useState("");
@@ -75,7 +76,7 @@ export default function Cameras() {
                     <td className="px-4 py-4"><span className="text-xs font-medium text-stone-600">{camera.zone}</span></td>
                     <td className="px-4 py-4"><div className="flex items-center gap-2"><StatusPill status={camera.sourceStatus} /><span className="max-w-[210px] truncate font-mono text-[10px] text-stone-400">{camera.sourceUrl ?? "URL belum diatur"}</span></div></td>
                     <td className="px-4 py-4"><StatusPill status={enabled ? "active" : "paused"} /></td>
-                    <td className="px-5 py-4"><div className="flex items-center justify-end gap-2"><Button variant="ghost" size="icon" aria-label={`Atur ${camera.name}`} onClick={() => toast.info(`Editor sumber untuk ${camera.name} akan disambungkan ke database.`)} className="h-8 w-8 rounded-lg text-stone-500 hover:bg-stone-100"><Link2 className="h-3.5 w-3.5" /></Button><button aria-pressed={enabled} onClick={() => toggleCamera(camera.id)} className={`relative h-6 w-11 rounded-full transition-colors ${enabled ? "bg-lime-400" : "bg-stone-200"}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${enabled ? "translate-x-6" : "translate-x-1"}`} /></button><ChevronDown className="h-3.5 w-3.5 text-stone-300" /></div></td>
+                    <td className="px-5 py-4"><div className="flex items-center justify-end gap-2"><Link href={`/cameras/${camera.id}`} aria-label={`Buka ${camera.name}`} className="grid h-8 w-8 place-items-center rounded-lg text-stone-500 transition-colors hover:bg-stone-100"><Link2 className="h-3.5 w-3.5" /></Link><button aria-pressed={enabled} onClick={() => toggleCamera(camera.id)} className={`relative h-6 w-11 rounded-full transition-colors ${enabled ? "bg-lime-400" : "bg-stone-200"}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${enabled ? "translate-x-6" : "translate-x-1"}`} /></button><Link href={`/cameras/${camera.id}`} aria-label={`Detail ${camera.name}`}><ChevronDown className="h-3.5 w-3.5 rotate-[-90deg] text-stone-300" /></Link></div></td>
                   </tr>
                 );
               })}

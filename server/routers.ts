@@ -34,6 +34,7 @@ export const appRouter = router({
       sourceKind: z.enum(["hls", "snapshot"]).optional(),
       sourceStatus: z.enum(["pending", "verified", "invalid"]).optional(),
       isActive: z.boolean().optional(),
+      captureIntervalMinutes: z.enum(["1", "5", "10", "15"]).nullable().optional(),
     })).mutation(({ input }) => updateCameraConfig(input)),
     updateCaptureSettings: adminProcedure.input(z.object({
       intervalMinutes: z.enum(["1", "5", "10", "15"]),
