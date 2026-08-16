@@ -63,3 +63,4 @@
 - [x] Mendokumentasikan bahwa pemasangan systemd, reboot recovery, batch produksi, dan aktivasi capture ditunda ke tahap deployment VPS berikutnya.
 - [x] Memperbaiki pembaruan filter waktu pada galeri agar perubahan waktu awal/akhir membentuk query snapshot baru.
 - [x] Mengekstrak dan menguji pembentukan URL ekspor ZIP agar filter kamera serta rentang tanggal diteruskan dengan benar.
+- [x] Menyelaraskan keterangan UI ekspor dengan perilaku streaming ZIP saat ini agar tidak mengklaim audit arsip yang belum dipersistenkan.
