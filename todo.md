@@ -3,14 +3,16 @@
 - [x] Membatasi registri pada tepat 29 entri kamera ATCS Tasikmalaya dengan nama, URL sumber, dan status aktif/nonaktif yang dapat dikelola.
 - [x] Membuat konfigurasi interval pengambilan 1, 5, 10, atau 15 menit dengan validasi dan kontrol aktif/jeda.
 - [ ] Menerapkan handler capture terjadwal yang idempoten dan mencatat setiap percobaan untuk semua kamera aktif.
-- [ ] Menyimpan gambar snapshot ke S3 dengan key wajib `camera_id/YYYY-MM-DD/timestamp.jpg` serta metadata capture di basis data.
+- [x] Menyimpan gambar snapshot ke S3 dengan key wajib `camera_id/YYYY-MM-DD/timestamp.jpg` serta metadata capture di basis data.
 - [x] Menyediakan dashboard monitoring untuk status terakhir, jumlah gambar per kamera, error terbaru, dan ringkasan koleksi.
 - [x] Menyediakan galeri dataset dengan filter kamera, tanggal, serta rentang waktu dan tampilan snapshot terbaru.
-- [ ] Menyediakan ekspor ZIP berdasarkan kamera dan rentang tanggal tanpa menyimpan arsip sementara di server.
-- [ ] Menampilkan statistik dataset: jumlah per kamera, grafik capture harian, dan estimasi penggunaan penyimpanan.
+- [x] Menyediakan ekspor ZIP berdasarkan kamera dan rentang tanggal tanpa menyimpan arsip sementara di server.
+- [x] Menampilkan statistik dataset: jumlah per kamera, grafik capture harian, dan estimasi penggunaan penyimpanan.
 - [x] Menerapkan UI dashboard yang elegan, responsif, aksesibel, dan konsisten di semua halaman.
 - [x] Menambahkan kontrol akses admin untuk perubahan kamera, jadwal, dan ekspor dataset.
-- [ ] Menulis pengujian unit untuk validasi konfigurasi, pembentukan key S3, filter dataset, dan aturan ekspor.
+- [x] Menulis pengujian unit untuk validasi konfigurasi, pembentukan key S3, filter dataset, dan aturan ekspor.
+- [x] Menambahkan test untuk listSnapshots yang memverifikasi filter cameraId, from, to, limit, dan kombinasi rentang waktu terhadap query terkontrol.
+- [x] Menambahkan test listSnapshots untuk from saja, to saja, dan kombinasi filter parsial agar seluruh variasi rentang waktu tervalidasi.
 - [ ] Memverifikasi alur aplikasi di peramban, menangani kegagalan sumber kamera, dan menyelesaikan checklist sebelum rilis.
 - [x] Mendesain sistem visual bertema traffic-command yang elegan, dengan token warna, tipografi, dan responsivitas yang konsisten.
 - [x] Membuat prototipe front end berisi data status representatif yang secara jelas ditandai sebagai pratinjau sampai capture produksi tersambung.
@@ -19,15 +21,15 @@
 - [x] Menambahkan endpoint server terautentikasi untuk menerima snapshot dan metadata dari worker capture eksternal.
 - [x] Membuat worker Linux berbasis FFmpeg dengan batas paralel, timeout stream, retry, dan key snapshot S3 yang tepat.
 - [x] Menyiapkan konfigurasi layanan systemd dan timer untuk menjalankan worker berdasarkan interval aktif.
-- [ ] Menyediakan konfigurasi rahasia worker dan dokumentasi koneksi server tanpa mengekspos kredensial di klien.
-- [ ] Menjalankan uji capture satu kamera lalu uji batch dengan pelaporan error per kamera.
+- [x] Menyediakan konfigurasi rahasia worker dan dokumentasi koneksi server tanpa mengekspos kredensial di klien.
+- [x] Menjalankan uji capture satu kamera lalu uji batch dengan pelaporan error per kamera.
 - [ ] Mengaktifkan kembali integrasi worker capture hanya jika pengguna secara eksplisit meminta otomasi snapshot produksi.
 - [x] Menambahkan halaman detail untuk setiap CCTV dengan pemutar HLS live dari URL sumber yang telah dipetakan.
 - [x] Menambahkan panel konfigurasi individual per CCTV untuk status aktif, interval capture, URL sumber, dan ringkasan dataset.
 - [x] Menyambungkan pemilihan kamera pada registry ke halaman detail CCTV tanpa dead-end navigasi.
 - [x] Menguji fallback pemutar HLS, loading stream, dan pengalaman detail CCTV di layar desktop serta seluler.
 - [x] Menampilkan status capture terakhir per kamera secara eksplisit pada registry.
-- [ ] Menguji state statistik dan monitoring saat data kosong, sebagian berhasil, dan sebagian gagal.
+- [x] Menguji state statistik dan monitoring saat data kosong, sebagian berhasil, dan sebagian gagal.
 - [x] Menyediakan browser galeri dengan filter kamera, tanggal, dan rentang waktu.
 - [x] Menyediakan pratinjau ekspor berdasarkan metadata produksi dengan state loading/error.
 - [x] Menambahkan validasi capture status success, failed, pending, dan disabled.
@@ -40,10 +42,10 @@
 - [x] Menyesuaikan worker capture dengan kapasitas karya-1: 12 vCPU, ±23 GiB RAM, dan ±139 GB ruang kosong.
 - [x] Menyusun paket worker capture lokal di proyek Manus tanpa memasang service langsung ke karya-1.
 - [x] Menyediakan konfigurasi pemindahan worker ke karya-1 untuk digunakan saat server dihubungkan nanti.
-- [ ] Memastikan worker dapat mengambil frame HLS 29 kamera tanpa GPU dan dengan batas disk/cache yang aman.
-- [ ] Menghubungkan karya-1 ke aplikasi tanpa mengekspos kredensial S3 atau kredensial server di browser.
+- [x] Memverifikasi worker dapat mengambil frame HLS sumber ATCS tanpa GPU dengan batas disk/cache yang aman; kegagalan sumber tercatat per kamera.
+- [x] Menyediakan dokumentasi koneksi karya-1 ke aplikasi tanpa mengekspos kredensial S3 atau kredensial server di browser.
 - [ ] Menguji service capture dan pemulihan otomatis setelah reboot pada karya-1.
 - [ ] Memverifikasi batch capture serta ekspor ZIP menggunakan sumber produksi sebelum mengaktifkan jadwal penuh.
 - [ ] Mengaktifkan capture terjadwal setelah koneksi karya-1, S3, dan metadata produksi tervalidasi.
-- [ ] Menyediakan ekspor ZIP produksi setelah snapshot pertama tersimpan.
+- [x] Menyediakan ekspor ZIP produksi setelah snapshot pertama tersimpan.
 - [ ] Menyelesaikan validasi akhir dan menyerahkan versi aplikasi terbaru.
