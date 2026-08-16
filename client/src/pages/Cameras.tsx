@@ -3,6 +3,7 @@ import PageHeader from "@/components/PageHeader";
 import StatusPill from "@/components/StatusPill";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { matchesCameraHealthFilter, type CameraHealthFilter } from "@/lib/cameraFilter";
 import { cameraDetailPath } from "@/lib/cameraRoutes";
 import { getCameraFailureLabel, getCameraSourceExplanation, getCameraSourceStatus } from "@/lib/cameraStatus";
 import { trpc } from "@/lib/trpc";
@@ -14,9 +15,19 @@ import { Link, useLocation } from "wouter";
 
 type ZoneFilter = "Semua" | "city" | "national";
 
+const healthFilterOptions: { label: string; value: CameraHealthFilter }[] = [
+  { label: "Semua", value: "all" },
+  { label: "Berhasil", value: "success" },
+  { label: "HLS gagal", value: "source_failure" },
+  { label: "Pipeline gagal", value: "pipeline_failure" },
+  { label: "Menunggu", value: "waiting" },
+  { label: "Nonaktif", value: "disabled" },
+];
+
 export default function Cameras() {
   const [query, setQuery] = useState("");
   const [zone, setZone] = useState<ZoneFilter>("Semua");
+  const [healthFilter, setHealthFilter] = useState<CameraHealthFilter>("all");
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const cameraQuery = trpc.dataset.cameras.useQuery();
@@ -28,8 +39,8 @@ export default function Cameras() {
   const filteredCameras = useMemo(() => cameras.filter((camera) => {
     const matchesQuery = camera.name.toLowerCase().includes(query.toLowerCase()) || camera.id.includes(query.toLowerCase());
     const matchesZone = zone === "Semua" || camera.zone === zone;
-    return matchesQuery && matchesZone;
-  }), [cameras, query, zone]);
+    return matchesQuery && matchesZone && matchesCameraHealthFilter(camera, healthFilter);
+  }), [cameras, healthFilter, query, zone]);
 
   const toggleCamera = (id: string, isActive: boolean) => {
     if (!isAdmin) {
@@ -66,6 +77,17 @@ export default function Cameras() {
             {([{ label: "Semua", value: "Semua" }, { label: "Jalan Kota", value: "city" }, { label: "Jalan Nasional", value: "national" }] as const).map((item) => <button key={item.value} onClick={() => setZone(item.value)} className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${zone === item.value ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"}`}>{item.label}</button>)}
             <Button variant="outline" onClick={() => toast.info("Konfigurasi batch sengaja tidak tersedia agar setiap CCTV ditinjau individual.")} className="h-9 rounded-lg border-stone-200 bg-white text-stone-600"><SlidersHorizontal className="mr-2 h-3.5 w-3.5" />Per-CCTV</Button>
           </div>
+        </div>
+
+        <div className="flex flex-col gap-3 border-b border-stone-100 bg-stone-50/50 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-5">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter kesehatan capture">
+            <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Kesehatan capture</span>
+            {healthFilterOptions.map((option) => {
+              const count = cameras.filter((camera) => matchesCameraHealthFilter(camera, option.value)).length;
+              return <button key={option.value} type="button" aria-pressed={healthFilter === option.value} aria-label={`${option.label}: ${count} kamera`} onClick={() => setHealthFilter(option.value)} className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${healthFilter === option.value ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-100"}`}>{option.label}<span className="ml-1.5 opacity-70">{count}</span></button>;
+            })}
+          </div>
+          <p aria-live="polite" className="text-xs text-stone-500">Menampilkan <span className="font-semibold text-stone-700">{filteredCameras.length}</span> dari {cameras.length} kamera.</p>
         </div>
 
         <div className="overflow-x-auto">
@@ -109,7 +131,7 @@ export default function Cameras() {
             </tbody>
           </table>
         </div>
-        {!cameraQuery.isLoading && filteredCameras.length === 0 ? <div className="p-12 text-center text-sm text-stone-500">Tidak ada kamera yang sesuai dengan pencarian.</div> : null}
+        {!cameraQuery.isLoading && filteredCameras.length === 0 ? <div className="p-12 text-center"><p className="text-sm text-stone-500">Tidak ada kamera yang sesuai dengan filter saat ini.</p><Button type="button" variant="outline" onClick={() => { setQuery(""); setZone("Semua"); setHealthFilter("all"); }} className="mt-3 rounded-lg border-stone-200 text-stone-600">Reset filter</Button></div> : null}
       </section>
     </div>
   );

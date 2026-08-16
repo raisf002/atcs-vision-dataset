@@ -91,3 +91,7 @@
 - [x] Menambahkan skenario DOM kamera capture berhasil agar label sumber terkonfigurasi pada ringkasan dashboard ikut terlindungi oleh regresi.
 - [x] Menambahkan konteks diagnostik dan tindakan pemulihan yang jelas pada detail CCTV ketika sumber HLS atau pipeline worker gagal.
 - [x] Menambahkan regresi detail CCTV untuk membedakan status sumber HLS gagal, pipeline gagal, dan capture berhasil.
+- [x] Menambahkan filter kesehatan sumber pada Camera registry untuk menemukan kamera berhasil, HLS gagal, pipeline gagal, atau menunggu dengan cepat.
+- [x] Menambahkan regresi filter kesehatan Camera registry agar hasil pemfilteran status tetap akurat.
+- [x] Memisahkan filter Camera registry untuk kamera menunggu dan kamera nonaktif agar kedua status tidak tercampur.
+- [x] Menambahkan regresi unit dan DOM yang memverifikasi filter menunggu dan nonaktif secara independen.

@@ -82,6 +82,33 @@ describe("Camera registry interactions", () => {
     expect(screen.getByText("Pipeline worker gagal")).toBeTruthy();
   });
 
+  it("filters the registry by capture health without hiding the source diagnosis", async () => {
+    const user = userEvent.setup();
+    mocks.cameras = [
+      { ...mocks.cameras[0], id: "healthy", name: "Healthy", lastCaptureStatus: "success", lastError: null },
+      { ...mocks.cameras[0], id: "hls-failed", name: "HLS Failed", lastCaptureStatus: "failed", lastError: "Error when loading first segment .ts" },
+      { ...mocks.cameras[0], id: "pipeline-failed", name: "Pipeline Failed", lastCaptureStatus: "failed", lastError: "worker timeout while uploading snapshot" },
+      { ...mocks.cameras[0], id: "pending", name: "Pending", lastCaptureStatus: "pending", lastError: null },
+      { ...mocks.cameras[0], id: "disabled", name: "Disabled", lastCaptureStatus: "disabled", lastError: null },
+    ];
+    render(<Cameras />);
+
+    await user.click(screen.getByRole("button", { name: /HLS gagal: 1 kamera/ }));
+
+    expect(screen.getByText("HLS Failed")).toBeTruthy();
+    expect(screen.getByText("Sumber HLS gagal")).toBeTruthy();
+    expect(screen.queryByText("Healthy")).toBeNull();
+    expect(screen.queryByText("Pipeline Failed")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: /Menunggu: 1 kamera/ }));
+    expect(screen.getByText("Pending")).toBeTruthy();
+    expect(screen.queryByText("Disabled")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: /Nonaktif: 1 kamera/ }));
+    expect(screen.getByText("Disabled")).toBeTruthy();
+    expect(screen.queryByText("Pending")).toBeNull();
+  });
+
   it("keeps the capture toggle independent from the row navigation", async () => {
     const user = userEvent.setup();
     render(<Cameras />);
