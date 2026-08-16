@@ -94,6 +94,15 @@ export async function getSnapshotStatsByCamera(cameraIds: string[]) {
   return db.select({ cameraId: snapshots.cameraId, count: count(snapshots.id), storageBytes: sum(snapshots.sizeBytes) }).from(snapshots).where(inArray(snapshots.cameraId, cameraIds)).groupBy(snapshots.cameraId);
 }
 
+export function aggregateDailySnapshotRows(rows: Array<{ capturedAt: Date | string }>) {
+  const totals = new Map<string, number>();
+  for (const row of rows) {
+    const date = new Date(row.capturedAt).toISOString().slice(0, 10);
+    totals.set(date, (totals.get(date) ?? 0) + 1);
+  }
+  return Array.from(totals.entries()).sort(([left], [right]) => left.localeCompare(right)).map(([date, snapshotCount]) => ({ date, count: snapshotCount }));
+}
+
 export async function getDailySnapshotCounts(days = 7) {
   const db = await getDb();
   if (!db) return [];
@@ -101,5 +110,11 @@ export async function getDailySnapshotCounts(days = 7) {
   start.setUTCDate(start.getUTCDate() - (days - 1));
   start.setUTCHours(0, 0, 0, 0);
   const captureDate = sql<string>`DATE(${snapshots.capturedAt})`;
-  return db.select({ date: captureDate, count: count(snapshots.id) }).from(snapshots).where(gte(snapshots.capturedAt, start)).groupBy(captureDate).orderBy(asc(captureDate));
+  try {
+    return await db.select({ date: captureDate, count: count(snapshots.id) }).from(snapshots).where(gte(snapshots.capturedAt, start)).groupBy(captureDate).orderBy(asc(captureDate));
+  } catch (error) {
+    console.warn("[Dataset] Daily SQL aggregation failed; using application fallback:", error);
+    const rows = await db.select({ capturedAt: snapshots.capturedAt }).from(snapshots).where(gte(snapshots.capturedAt, start)).orderBy(asc(snapshots.capturedAt));
+    return aggregateDailySnapshotRows(rows);
+  }
 }

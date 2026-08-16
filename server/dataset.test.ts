@@ -3,6 +3,7 @@ import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 import { ATCS_CAMERA_SEED } from "../shared/atcsCameras";
 import { buildDailySnapshotSeries, CAPTURE_INTERVALS, isCaptureInterval, makeSnapshotStorageKey } from "../shared/dataset";
+import { aggregateDailySnapshotRows } from "./dataset";
 
 describe("dataset foundation contracts", () => {
   it("pins the registry to exactly 29 unique ATCS cameras", () => {
@@ -26,6 +27,17 @@ describe("dataset foundation contracts", () => {
   it("builds a contiguous daily series and fills days without capture", () => {
     expect(buildDailySnapshotSeries([{ date: "2026-08-14", count: 4 }, { date: "2026-08-16", count: 2 }], 3, new Date("2026-08-16T12:00:00Z")))
       .toEqual([{ date: "2026-08-14", count: 4 }, { date: "2026-08-15", count: 0 }, { date: "2026-08-16", count: 2 }]);
+  });
+
+  it("aggregates daily snapshot rows in UTC for the SQL fallback path", () => {
+    expect(aggregateDailySnapshotRows([
+      { capturedAt: "2026-08-16T01:00:00.000Z" },
+      { capturedAt: "2026-08-16T02:00:00.000Z" },
+      { capturedAt: "2026-08-15T23:59:59.000Z" },
+    ])).toEqual([
+      { date: "2026-08-15", count: 1 },
+      { date: "2026-08-16", count: 2 },
+    ]);
   });
 });
 

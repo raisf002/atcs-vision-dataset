@@ -52,3 +52,9 @@
 - [ ] Mengaktifkan capture terjadwal setelah koneksi karya-1, S3, dan metadata produksi tervalidasi.
 - [x] Menyediakan ekspor ZIP produksi setelah snapshot pertama tersimpan.
 - [ ] Menyelesaikan validasi akhir dan menyerahkan versi aplikasi terbaru.
+
+- [x] Memperbaiki kegagalan query statistik harian `DATE(capturedAt)` yang muncul pada log browser dan menambahkan validasi regresinya.
+
+- [x] Menambahkan test getDailySnapshotCounts yang memock kegagalan query SQL DATE(capturedAt) lalu memverifikasi fallback aplikasi.
+- [x] Menambahkan test integrasi dataset.dailyStats yang membuktikan fallback dipakai tanpa melempar error ke klien ketika agregasi SQL gagal.
+- [ ] Memverifikasi ulang Overview dalam sesi login/admin nyata atau melalui uji end-to-end yang memuat daily stats; pastikan tidak ada error statistik harian baru di browser/log.
