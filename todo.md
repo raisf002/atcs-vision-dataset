@@ -84,3 +84,5 @@
 - [x] Menambahkan test DOM untuk state galeri kosong, galeri error, ekspor kosong, dan pratinjau ekspor error.
 - [x] Menyempurnakan pesan visual galeri dan ekspor agar state kosong serta error menjelaskan tindakan pengguna berikutnya.
 - [x] Memperjelas state kosong dan error pada galeri dengan arahan memilih filter lain, menjalankan capture, atau mencoba ulang metadata.
+- [x] Menambahkan ringkasan kesehatan capture pada dashboard yang membedakan berhasil, gagal karena sumber HLS, menunggu, dan nonaktif.
+- [x] Menambahkan regresi untuk ringkasan kesehatan capture serta memverifikasi tampilannya di pratinjau desktop dan seluler.
