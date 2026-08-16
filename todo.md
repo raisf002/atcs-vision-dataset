@@ -8,8 +8,8 @@
 - [x] Menyediakan galeri dataset dengan filter kamera, tanggal, serta rentang waktu dan tampilan snapshot terbaru.
 - [ ] Menyediakan ekspor ZIP berdasarkan kamera dan rentang tanggal tanpa menyimpan arsip sementara di server.
 - [ ] Menampilkan statistik dataset: jumlah per kamera, grafik capture harian, dan estimasi penggunaan penyimpanan.
-- [ ] Menerapkan UI dashboard yang elegan, responsif, aksesibel, dan konsisten di semua halaman.
-- [ ] Menambahkan kontrol akses admin untuk perubahan kamera, jadwal, dan ekspor dataset.
+- [x] Menerapkan UI dashboard yang elegan, responsif, aksesibel, dan konsisten di semua halaman.
+- [x] Menambahkan kontrol akses admin untuk perubahan kamera, jadwal, dan ekspor dataset.
 - [ ] Menulis pengujian unit untuk validasi konfigurasi, pembentukan key S3, filter dataset, dan aturan ekspor.
 - [ ] Memverifikasi alur aplikasi di peramban, menangani kegagalan sumber kamera, dan menyelesaikan checklist sebelum rilis.
 - [x] Mendesain sistem visual bertema traffic-command yang elegan, dengan token warna, tipografi, dan responsivitas yang konsisten.
@@ -26,3 +26,22 @@
 - [x] Menambahkan panel konfigurasi individual per CCTV untuk status aktif, interval capture, URL sumber, dan ringkasan dataset.
 - [x] Menyambungkan pemilihan kamera pada registry ke halaman detail CCTV tanpa dead-end navigasi.
 - [x] Menguji fallback pemutar HLS, loading stream, dan pengalaman detail CCTV di layar desktop serta seluler.
+- [x] Menampilkan status capture terakhir per kamera secara eksplisit pada registry.
+- [ ] Menguji state statistik dan monitoring saat data kosong, sebagian berhasil, dan sebagian gagal.
+- [x] Menyediakan browser galeri dengan filter kamera, tanggal, dan rentang waktu.
+- [x] Menyediakan pratinjau ekspor berdasarkan metadata produksi dengan state loading/error.
+- [x] Menambahkan validasi capture status success, failed, pending, dan disabled.
+- [x] Menambahkan dashboard produksi dengan ringkasan metadata, statistik per kamera, grafik harian, dan error log.
+- [x] Menambahkan autentikasi admin untuk perubahan konfigurasi kamera.
+- [x] Menambahkan pemutar HLS lintas-peramban dengan fallback untuk URL kosong/invalid.
+- [x] Menyesuaikan UI dengan sistem visual traffic-command dan responsivitas desktop/seluler.
+- [x] Menambahkan pengujian unit untuk status capture dan fallback HLS.
+- [x] Menyimpan checkpoint setelah milestone front end dan metadata produksi.
+- [ ] Menyesuaikan worker capture dengan kapasitas karya-1: 12 vCPU, ±23 GiB RAM, dan ±139 GB ruang kosong.
+- [ ] Memastikan worker dapat mengambil frame HLS 29 kamera tanpa GPU dan dengan batas disk/cache yang aman.
+- [ ] Menghubungkan karya-1 ke aplikasi tanpa mengekspos kredensial S3 atau kredensial server di browser.
+- [ ] Menguji service capture dan pemulihan otomatis setelah reboot pada karya-1.
+- [ ] Memverifikasi batch capture serta ekspor ZIP menggunakan sumber produksi sebelum mengaktifkan jadwal penuh.
+- [ ] Mengaktifkan capture terjadwal setelah koneksi karya-1, S3, dan metadata produksi tervalidasi.
+- [ ] Menyediakan ekspor ZIP produksi setelah snapshot pertama tersimpan.
+- [ ] Menyelesaikan validasi akhir dan menyerahkan versi aplikasi terbaru.
