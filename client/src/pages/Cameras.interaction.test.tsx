@@ -8,6 +8,19 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   mutate: vi.fn(),
   refetch: vi.fn(),
+  cameras: [{
+    id: "cimulu",
+    name: "Simpang Cimulu",
+    sortOrder: 1,
+    zone: "city",
+    sourceStatus: "verified",
+    sourceUrl: "https://example.test/cimulu.m3u8",
+    isActive: true,
+    lastCaptureStatus: "success",
+    lastCaptureAt: null,
+    captureIntervalMinutes: "5",
+    lastError: null as string | null,
+  }],
 }));
 
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ user: { role: "admin" } }) }));
@@ -16,18 +29,7 @@ vi.mock("@/lib/trpc", () => ({
     dataset: {
       cameras: {
         useQuery: () => ({
-          data: [{
-            id: "cimulu",
-            name: "Simpang Cimulu",
-            sortOrder: 1,
-            zone: "city",
-            sourceStatus: "verified",
-            sourceUrl: "https://example.test/cimulu.m3u8",
-            isActive: true,
-            lastCaptureStatus: "success",
-            lastCaptureAt: null,
-            captureIntervalMinutes: "5",
-          }],
+          data: mocks.cameras,
           isLoading: false,
           refetch: mocks.refetch,
         }),
@@ -47,6 +49,14 @@ import Cameras from "./Cameras";
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  mocks.cameras = [{
+    ...mocks.cameras[0],
+    id: "cimulu",
+    name: "Simpang Cimulu",
+    sourceStatus: "verified",
+    lastCaptureStatus: "success",
+    lastError: null,
+  }];
 });
 
 describe("Camera registry interactions", () => {
@@ -57,6 +67,19 @@ describe("Camera registry interactions", () => {
     await user.click(screen.getByRole("link", { name: "Buka detail dan pengaturan Simpang Cimulu" }));
 
     expect(mocks.navigate).toHaveBeenCalledWith("/cameras/cimulu");
+  });
+
+  it("renders different explanations for source, pending, and pipeline failures", () => {
+    mocks.cameras = [
+      { ...mocks.cameras[0], id: "hls-failed", name: "HLS Failed", lastCaptureStatus: "failed", lastError: "Error when loading first segment .ts" },
+      { ...mocks.cameras[0], id: "not-tested", name: "Not Tested", sourceStatus: "pending", lastCaptureStatus: "pending", lastError: null },
+      { ...mocks.cameras[0], id: "pipeline-failed", name: "Pipeline Failed", lastCaptureStatus: "failed", lastError: "worker timeout while uploading snapshot" },
+    ];
+    render(<Cameras />);
+
+    expect(screen.getByText("Sumber HLS gagal")).toBeTruthy();
+    expect(screen.getByText("URL HLS belum diuji oleh worker.")).toBeTruthy();
+    expect(screen.getByText("Pipeline worker gagal")).toBeTruthy();
   });
 
   it("keeps the capture toggle independent from the row navigation", async () => {

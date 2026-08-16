@@ -4,6 +4,7 @@ import StatusPill from "@/components/StatusPill";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
+import { getCameraFailureLabel, getCameraSourceExplanation, getCameraSourceStatus } from "@/lib/cameraStatus";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Activity, ArrowLeft, Camera, Check, ExternalLink, FolderKey, Save, Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -46,6 +47,10 @@ export default function CameraDetail() {
     return <div className="mx-auto max-w-xl rounded-[1.5rem] border border-stone-200 bg-white p-8 text-center shadow-sm"><Camera className="mx-auto h-8 w-8 text-stone-300" /><h1 className="mt-4 text-xl font-semibold text-stone-900">Kamera tidak ditemukan</h1><p className="mt-2 text-sm text-stone-500">Kembali ke registry untuk memilih salah satu dari 29 CCTV ATCS.</p><Link href="/cameras" className="mt-6 inline-flex rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white">Kembali ke registry</Link></div>;
   }
 
+  const sourceDisplayStatus = getCameraSourceStatus(camera.sourceStatus, camera.lastCaptureStatus);
+  const failureLabel = getCameraFailureLabel(camera.lastCaptureStatus, camera.lastError);
+  const failureExplanation = getCameraSourceExplanation(camera.sourceStatus, camera.lastCaptureStatus, camera.lastError);
+
   const saveDraft = () => {
     const payload = { sourceUrl: sourceUrl || null, isActive: captureEnabled, captureIntervalMinutes: interval };
     if (user?.role !== "admin") localStorage.setItem(`atcs-camera-draft-${camera.id}`, JSON.stringify(payload));
@@ -67,8 +72,10 @@ export default function CameraDetail() {
         eyebrow={`CCTV ${camera.id} · ${camera.zone}`}
         title={camera.name}
         description={user?.role === "admin" ? "Pantau live view dan kelola pengaturan capture khusus untuk titik CCTV ini. Perubahan disimpan langsung ke registry produksi." : "Pantau live view dan siapkan pengaturan capture khusus untuk titik CCTV ini. Draf lokal dapat digunakan sebelum akses admin tersedia."}
-        actions={<><StatusPill status={camera.sourceStatus} /><Button onClick={saveDraft} disabled={updateCamera.isPending} className="rounded-xl bg-stone-900 text-white hover:bg-stone-800"><Save className="mr-2 h-4 w-4" />{updateCamera.isPending ? "Menyimpan…" : "Simpan konfigurasi"}</Button></>}
+        actions={<><StatusPill status={sourceDisplayStatus} /><Button onClick={saveDraft} disabled={updateCamera.isPending} className="rounded-xl bg-stone-900 text-white hover:bg-stone-800"><Save className="mr-2 h-4 w-4" />{updateCamera.isPending ? "Menyimpan…" : "Simpan konfigurasi"}</Button></>}
       />
+
+      {failureExplanation ? <div role="status" className={`rounded-2xl border p-4 ${failureLabel === "Sumber HLS gagal" ? "border-orange-200 bg-orange-50" : "border-red-200 bg-red-50"}`}><p className={`text-sm font-semibold ${failureLabel === "Sumber HLS gagal" ? "text-orange-900" : "text-red-900"}`}>{failureLabel}</p><p className="mt-1 text-sm leading-6 text-stone-700">{failureExplanation}</p><p className="mt-2 text-xs text-stone-500">Periksa URL dan status worker sebelum mengubah konfigurasi kamera.</p></div> : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.75fr)]">
         <section className="space-y-5"><LiveHlsPlayer sourceUrl={sourceUrl || null} cameraName={camera.name} /><div className="grid gap-3 sm:grid-cols-3"><div className="rounded-xl border border-stone-200 bg-white p-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Dataset images</p><p className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">{camera.captureCount}</p><p className="mt-1 text-xs text-stone-500">{camera.captureCount ? "Metadata tersimpan" : "Menunggu capture"}</p></div><div className="rounded-xl border border-stone-200 bg-white p-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Last capture</p><p className="mt-2 text-sm font-semibold text-stone-950">{camera.lastCaptureAt ? new Date(camera.lastCaptureAt).toLocaleString("id-ID") : "Belum ada"}</p><p className="mt-1 text-xs text-stone-500">{camera.lastCaptureAt ? "Waktu capture terakhir" : "Tidak ada snapshot"}</p></div><div className="rounded-xl border border-stone-200 bg-white p-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Storage key</p><p className="mt-2 font-mono text-[11px] font-medium text-stone-800">{camera.id}/…</p><p className="mt-1 text-xs text-stone-500">JPEG per tanggal</p></div></div></section>

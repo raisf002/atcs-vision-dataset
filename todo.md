@@ -71,3 +71,13 @@
 - [x] Menambahkan pengumuman aksesibel untuk perubahan status validasi, loading, dan hasil filter pada galeri serta ekspor.
 - [x] Membuat seluruh entri Camera registry dapat diklik untuk membuka detail CCTV dan konfigurasi per kamera.
 - [x] Memverifikasi pada pratinjau dan test DOM bahwa klik baris Camera registry membuka detail CCTV, sementara toggle dan tautan aksi tetap independen.
+
+- [x] Mendiagnosis status kamera gagal pada Camera registry dengan membandingkan metadata capture, error log, dan respons sumber HLS.
+- [x] Memperbaiki bug aplikasi yang terbukti menyebabkan status kamera gagal atau menyesatkan, lalu menambahkan regresinya.
+- [x] Menambahkan penjelasan UI yang membedakan sumber HLS tidak tersedia dari kegagalan pipeline aplikasi.
+
+- [x] Menambahkan penjelasan visual yang terlihat di Camera registry/detail untuk membedakan stream HLS sumber gagal dari kegagalan worker/pipeline.
+- [x] Menambahkan regresi UI untuk label sumber HLS gagal, sumber belum diuji, dan kegagalan pipeline.
+
+- [x] Menambahkan penjelasan status sumber HLS/pipeline yang sama pada halaman detail CCTV dan memverifikasinya pada pratinjau.
+- [x] Menambahkan test DOM rendering Camera registry untuk label Sumber HLS gagal, sumber belum diuji, dan Pipeline worker gagal.

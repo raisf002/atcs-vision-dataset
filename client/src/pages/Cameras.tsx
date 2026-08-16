@@ -4,6 +4,7 @@ import StatusPill from "@/components/StatusPill";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cameraDetailPath } from "@/lib/cameraRoutes";
+import { getCameraFailureLabel, getCameraSourceExplanation, getCameraSourceStatus } from "@/lib/cameraStatus";
 import { trpc } from "@/lib/trpc";
 import { captureStatusLabels, captureStatusStyles } from "@shared/captureStatus";
 import { Camera, ChevronDown, Link2, Search, SlidersHorizontal } from "lucide-react";
@@ -94,7 +95,7 @@ export default function Cameras() {
                     </div>
                   </td>
                   <td className="px-4 py-4"><span className="text-xs font-medium text-stone-600">{camera.zone === "city" ? "Jalan Kota" : "Jalan Nasional"}</span></td>
-                  <td className="px-4 py-4"><div className="flex items-center gap-2"><StatusPill status={camera.sourceStatus} /><span className="max-w-[210px] truncate font-mono text-[10px] text-stone-400">{camera.sourceUrl ?? "URL belum diatur"}</span></div></td>
+                  <td className="px-4 py-4"><div className="flex min-w-[270px] flex-col items-start gap-1"><div className="flex items-center gap-2"><StatusPill status={getCameraSourceStatus(camera.sourceStatus, camera.lastCaptureStatus)} /><span className="max-w-[210px] truncate font-mono text-[10px] text-stone-400">{camera.sourceUrl ?? "URL belum diatur"}</span></div>{getCameraFailureLabel(camera.lastCaptureStatus, camera.lastError) ? <span className={`text-[10px] font-semibold ${getCameraFailureLabel(camera.lastCaptureStatus, camera.lastError) === "Sumber HLS gagal" ? "text-orange-700" : "text-red-700"}`}>{getCameraFailureLabel(camera.lastCaptureStatus, camera.lastError)}</span> : null}{getCameraSourceExplanation(camera.sourceStatus, camera.lastCaptureStatus, camera.lastError) ? <span className="text-[10px] leading-4 text-stone-500">{getCameraSourceExplanation(camera.sourceStatus, camera.lastCaptureStatus, camera.lastError)}</span> : null}</div></td>
                   <td className="px-4 py-4"><div className="flex items-center gap-2"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${captureStatusStyles[camera.lastCaptureStatus]}`}>{captureStatusLabels[camera.lastCaptureStatus]}</span><span className="text-[10px] text-stone-400">{camera.lastCaptureAt ? new Date(camera.lastCaptureAt).toLocaleString("id-ID") : camera.captureIntervalMinutes ? `${camera.captureIntervalMinutes} min` : "belum berjalan"}</span></div></td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-2">
