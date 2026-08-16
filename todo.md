@@ -16,9 +16,9 @@
 - [x] Membuat prototipe front end berisi data status representatif yang secara jelas ditandai sebagai pratinjau sampai capture produksi tersambung.
 - [x] Membuat navigasi dashboard untuk Overview, Cameras, Dataset Gallery, Exports, dan Settings tanpa dead-end antarmuka.
 - [x] Menyempurnakan semua layar utama untuk alur desktop dan seluler sebelum integrasi capture HLS dimulai.
-- [ ] Menambahkan endpoint server terautentikasi untuk menerima snapshot dan metadata dari worker capture eksternal.
-- [ ] Membuat worker Linux berbasis FFmpeg dengan batas paralel, timeout stream, retry, dan key snapshot S3 yang tepat.
-- [ ] Menyiapkan konfigurasi layanan systemd dan timer untuk menjalankan worker berdasarkan interval aktif.
+- [x] Menambahkan endpoint server terautentikasi untuk menerima snapshot dan metadata dari worker capture eksternal.
+- [x] Membuat worker Linux berbasis FFmpeg dengan batas paralel, timeout stream, retry, dan key snapshot S3 yang tepat.
+- [x] Menyiapkan konfigurasi layanan systemd dan timer untuk menjalankan worker berdasarkan interval aktif.
 - [ ] Menyediakan konfigurasi rahasia worker dan dokumentasi koneksi server tanpa mengekspos kredensial di klien.
 - [ ] Menjalankan uji capture satu kamera lalu uji batch dengan pelaporan error per kamera.
 - [ ] Mengaktifkan kembali integrasi worker capture hanya jika pengguna secara eksplisit meminta otomasi snapshot produksi.
@@ -37,7 +37,9 @@
 - [x] Menyesuaikan UI dengan sistem visual traffic-command dan responsivitas desktop/seluler.
 - [x] Menambahkan pengujian unit untuk status capture dan fallback HLS.
 - [x] Menyimpan checkpoint setelah milestone front end dan metadata produksi.
-- [ ] Menyesuaikan worker capture dengan kapasitas karya-1: 12 vCPU, ±23 GiB RAM, dan ±139 GB ruang kosong.
+- [x] Menyesuaikan worker capture dengan kapasitas karya-1: 12 vCPU, ±23 GiB RAM, dan ±139 GB ruang kosong.
+- [x] Menyusun paket worker capture lokal di proyek Manus tanpa memasang service langsung ke karya-1.
+- [x] Menyediakan konfigurasi pemindahan worker ke karya-1 untuk digunakan saat server dihubungkan nanti.
 - [ ] Memastikan worker dapat mengambil frame HLS 29 kamera tanpa GPU dan dengan batas disk/cache yang aman.
 - [ ] Menghubungkan karya-1 ke aplikasi tanpa mengekspos kredensial S3 atau kredensial server di browser.
 - [ ] Menguji service capture dan pemulihan otomatis setelah reboot pada karya-1.

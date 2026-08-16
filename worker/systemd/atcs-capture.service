@@ -1,0 +1,20 @@
+[Unit]
+Description=ATCS Vision Dataset HLS capture batch
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=atcs-capture
+Group=atcs-capture
+WorkingDirectory=/opt/atcs-vision-dataset/worker
+EnvironmentFile=/etc/atcs-capture.env
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/bin/env node /opt/atcs-vision-dataset/worker/capture.mjs
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/atcs-capture

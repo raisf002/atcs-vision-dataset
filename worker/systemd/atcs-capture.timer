@@ -1,0 +1,11 @@
+[Unit]
+Description=Run ATCS Vision Dataset capture every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+Persistent=true
+RandomizedDelaySec=5
+Unit=atcs-capture.service
+
+[Install]
+WantedBy=timers.target
