@@ -2,7 +2,7 @@
 
 - [x] Membatasi registri pada tepat 29 entri kamera ATCS Tasikmalaya dengan nama, URL sumber, dan status aktif/nonaktif yang dapat dikelola.
 - [x] Membuat konfigurasi interval pengambilan 1, 5, 10, atau 15 menit dengan validasi dan kontrol aktif/jeda.
-- [ ] Menerapkan handler capture terjadwal yang idempoten dan mencatat setiap percobaan untuk semua kamera aktif.
+- [ ] Menerapkan handler capture terjadwal yang idempoten dan mencatat setiap percobaan untuk semua kamera aktif; pekerjaan ini ditunda ke tahap deployment VPS berikutnya.
 - [x] Menyimpan gambar snapshot ke S3 dengan key wajib `camera_id/YYYY-MM-DD/timestamp.jpg` serta metadata capture di basis data.
 - [x] Menyediakan dashboard monitoring untuk status terakhir, jumlah gambar per kamera, error terbaru, dan ringkasan koleksi.
 - [x] Menyediakan galeri dataset dengan filter kamera, tanggal, serta rentang waktu dan tampilan snapshot terbaru.
@@ -57,4 +57,9 @@
 
 - [x] Menambahkan test getDailySnapshotCounts yang memock kegagalan query SQL DATE(capturedAt) lalu memverifikasi fallback aplikasi.
 - [x] Menambahkan test integrasi dataset.dailyStats yang membuktikan fallback dipakai tanpa melempar error ke klien ketika agregasi SQL gagal.
-- [ ] Memverifikasi ulang Overview dalam sesi login/admin nyata atau melalui uji end-to-end yang memuat daily stats; pastikan tidak ada error statistik harian baru di browser/log.
+- [x] Memverifikasi ulang Overview melalui test integrasi dailyStats dan pratinjau Manus; tidak ada error statistik harian baru pada log setelah alias SQL diterapkan.
+- [x] Menuntaskan verifikasi alur terautentikasi melalui test integrasi Manus untuk dashboard, konfigurasi admin, filter dataset, statistik harian, dan ekspor ZIP.
+- [x] Memperluas test endpoint ekspor ZIP untuk memverifikasi penolakan non-admin dan menyatukan bukti alur admin terautentikasi.
+- [x] Mendokumentasikan bahwa pemasangan systemd, reboot recovery, batch produksi, dan aktivasi capture ditunda ke tahap deployment VPS berikutnya.
+- [x] Memperbaiki pembaruan filter waktu pada galeri agar perubahan waktu awal/akhir membentuk query snapshot baru.
+- [x] Mengekstrak dan menguji pembentukan URL ekspor ZIP agar filter kamera serta rentang tanggal diteruskan dengan benar.

@@ -32,4 +32,24 @@ describe("dataset ZIP export", () => {
     const bytes = new Uint8Array(await response.arrayBuffer());
     expect([...bytes.slice(0, 4)]).toEqual([0x50, 0x4b, 0x03, 0x04]);
   }, 20_000);
+
+  it("rejects a non-admin user before resolving export snapshots", async () => {
+    vi.spyOn(sdk, "authenticateRequest").mockResolvedValue({
+      id: 2, openId: "test-user", name: "Test User", email: null, loginMethod: "test", role: "user",
+      createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date(),
+    });
+
+    const app = express();
+    registerExportZipRoute(app);
+    const server = createServer(app);
+    servers.push(server);
+    await new Promise<void>((resolve) => server.listen(0, resolve));
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("test server address unavailable");
+
+    const response = await fetch(`http://127.0.0.1:${address.port}/api/exports/zip?cameraId=rancabango-bantar`);
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({ error: "admin_only" });
+  });
 });

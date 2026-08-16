@@ -1,6 +1,7 @@
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import { buildExportZipUrl } from "@/lib/exportUrl";
 import { Archive, CalendarRange, CheckCircle2, Download, FileArchive, FolderDown, HardDriveDownload, LoaderCircle, PackageCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -27,11 +28,7 @@ export default function Exports() {
   const selectedBytes = snapshots.reduce((total, snapshot) => total + snapshot.sizeBytes, 0);
   const canBuild = snapshots.length > 0 && !snapshotQuery.isLoading && !snapshotQuery.isError;
   const startExport = () => {
-    const params = new URLSearchParams();
-    if (cameraId !== "all") params.set("cameraId", cameraId);
-    if (fromDate) params.set("from", fromDate);
-    if (toDate) params.set("to", toDate);
-    window.location.assign(`/api/exports/zip?${params.toString()}`);
+    window.location.assign(buildExportZipUrl({ cameraId, fromDate, toDate }));
   };
 
   return (

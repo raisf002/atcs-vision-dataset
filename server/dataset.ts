@@ -109,7 +109,7 @@ export async function getDailySnapshotCounts(days = 7) {
   const start = new Date();
   start.setUTCDate(start.getUTCDate() - (days - 1));
   start.setUTCHours(0, 0, 0, 0);
-  const captureDate = sql<string>`DATE(${snapshots.capturedAt})`;
+  const captureDate = sql<string>`DATE(${snapshots.capturedAt})`.as("date");
   try {
     return await db.select({ date: captureDate, count: count(snapshots.id) }).from(snapshots).where(gte(snapshots.capturedAt, start)).groupBy(captureDate).orderBy(asc(captureDate));
   } catch (error) {

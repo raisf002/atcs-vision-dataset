@@ -2,6 +2,7 @@ import PageHeader from "@/components/PageHeader";
 import StatusPill from "@/components/StatusPill";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import { buildSnapshotQueryInput } from "@/lib/datasetQuery";
 import { AlertTriangle, CalendarDays, Download, Filter, ImageOff, LoaderCircle, Search, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -19,12 +20,7 @@ export default function DatasetGallery() {
   const [startTime, setStartTime] = useState("00:00");
   const [endTime, setEndTime] = useState("23:59");
   const cameraQuery = trpc.dataset.cameras.useQuery();
-  const queryInput = useMemo(() => {
-    if (!date) return { cameraId: cameraId === "all" ? undefined : cameraId, limit: 120 };
-    const start = new Date(`${date}T${startTime}:00.000Z`);
-    const end = new Date(`${date}T${endTime}:59.999Z`);
-    return { cameraId: cameraId === "all" ? undefined : cameraId, from: start, to: end, limit: 120 };
-  }, [cameraId, date]);
+  const queryInput = useMemo(() => buildSnapshotQueryInput({ cameraId, date, startTime, endTime }), [cameraId, date, startTime, endTime]);
   const snapshotQuery = trpc.dataset.snapshots.useQuery(queryInput);
   const cameras = cameraQuery.data ?? [];
   const snapshots = snapshotQuery.data ?? [];
