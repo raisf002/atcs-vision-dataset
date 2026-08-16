@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ATCS_CAMERA_SEED } from "../shared/atcsCameras";
-import { CAPTURE_INTERVALS, isCaptureInterval, makeSnapshotStorageKey } from "../shared/dataset";
+import { buildDailySnapshotSeries, CAPTURE_INTERVALS, isCaptureInterval, makeSnapshotStorageKey } from "../shared/dataset";
 
 describe("dataset foundation contracts", () => {
   it("pins the registry to exactly 29 unique ATCS cameras", () => {
@@ -19,5 +19,10 @@ describe("dataset foundation contracts", () => {
   it("creates the strict camera/date/timestamp object key", () => {
     expect(makeSnapshotStorageKey("cimulu", new Date("2026-08-16T09:30:00.000Z")))
       .toBe("cimulu/2026-08-16/2026-08-16T09-30-00-000Z.jpg");
+  });
+
+  it("builds a contiguous daily series and fills days without capture", () => {
+    expect(buildDailySnapshotSeries([{ date: "2026-08-14", count: 4 }, { date: "2026-08-16", count: 2 }], 3, new Date("2026-08-16T12:00:00Z")))
+      .toEqual([{ date: "2026-08-14", count: 4 }, { date: "2026-08-15", count: 0 }, { date: "2026-08-16", count: 2 }]);
   });
 });

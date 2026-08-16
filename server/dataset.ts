@@ -93,3 +93,13 @@ export async function getSnapshotStatsByCamera(cameraIds: string[]) {
   if (!db || cameraIds.length === 0) return [];
   return db.select({ cameraId: snapshots.cameraId, count: count(snapshots.id), storageBytes: sum(snapshots.sizeBytes) }).from(snapshots).where(inArray(snapshots.cameraId, cameraIds)).groupBy(snapshots.cameraId);
 }
+
+export async function getDailySnapshotCounts(days = 7) {
+  const db = await getDb();
+  if (!db) return [];
+  const start = new Date();
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+  start.setUTCHours(0, 0, 0, 0);
+  const captureDate = sql<string>`DATE(${snapshots.capturedAt})`;
+  return db.select({ date: captureDate, count: count(snapshots.id) }).from(snapshots).where(gte(snapshots.capturedAt, start)).groupBy(captureDate).orderBy(asc(captureDate));
+}

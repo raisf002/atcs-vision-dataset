@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { getCaptureSettings, getDatasetOverview, listCameras, listSnapshots, updateCameraConfig, updateCaptureSettings } from "./dataset";
+import { getCaptureSettings, getDailySnapshotCounts, getDatasetOverview, getSnapshotStatsByCamera, listCameras, listSnapshots, updateCameraConfig, updateCaptureSettings } from "./dataset";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -28,6 +28,11 @@ export const appRouter = router({
       to: z.date().optional(),
       limit: z.number().int().min(1).max(120).default(60),
     })).query(({ input }) => listSnapshots(input)),
+    dailyStats: protectedProcedure.input(z.object({ days: z.number().int().min(1).max(31).default(7) })).query(({ input }) => getDailySnapshotCounts(input.days)),
+    cameraStats: protectedProcedure.query(async () => {
+      const cameraRows = await listCameras();
+      return getSnapshotStatsByCamera(cameraRows.map((camera) => camera.id));
+    }),
     updateCamera: adminProcedure.input(z.object({
       id: z.string().min(1).max(96),
       sourceUrl: z.url().nullable().optional(),

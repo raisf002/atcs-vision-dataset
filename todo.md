@@ -1,11 +1,11 @@
 # Project TODO
 
-- [ ] Membatasi registri pada tepat 29 entri kamera ATCS Tasikmalaya dengan nama, URL sumber, dan status aktif/nonaktif yang dapat dikelola.
-- [ ] Membuat konfigurasi interval pengambilan 1, 5, 10, atau 15 menit dengan validasi dan kontrol aktif/jeda.
+- [x] Membatasi registri pada tepat 29 entri kamera ATCS Tasikmalaya dengan nama, URL sumber, dan status aktif/nonaktif yang dapat dikelola.
+- [x] Membuat konfigurasi interval pengambilan 1, 5, 10, atau 15 menit dengan validasi dan kontrol aktif/jeda.
 - [ ] Menerapkan handler capture terjadwal yang idempoten dan mencatat setiap percobaan untuk semua kamera aktif.
 - [ ] Menyimpan gambar snapshot ke S3 dengan key wajib `camera_id/YYYY-MM-DD/timestamp.jpg` serta metadata capture di basis data.
-- [ ] Menyediakan dashboard monitoring untuk status terakhir, jumlah gambar per kamera, error terbaru, dan ringkasan koleksi.
-- [ ] Menyediakan galeri dataset dengan filter kamera, tanggal, serta rentang waktu dan tampilan snapshot terbaru.
+- [x] Menyediakan dashboard monitoring untuk status terakhir, jumlah gambar per kamera, error terbaru, dan ringkasan koleksi.
+- [x] Menyediakan galeri dataset dengan filter kamera, tanggal, serta rentang waktu dan tampilan snapshot terbaru.
 - [ ] Menyediakan ekspor ZIP berdasarkan kamera dan rentang tanggal tanpa menyimpan arsip sementara di server.
 - [ ] Menampilkan statistik dataset: jumlah per kamera, grafik capture harian, dan estimasi penggunaan penyimpanan.
 - [ ] Menerapkan UI dashboard yang elegan, responsif, aksesibel, dan konsisten di semua halaman.
