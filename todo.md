@@ -68,3 +68,4 @@
 - [x] Menambahkan validasi rentang waktu pada galeri agar waktu akhir yang lebih awal tidak mengirim query snapshot yang tidak valid.
 - [x] Menambahkan validasi rentang tanggal pada ekspor agar unduhan ZIP tidak dapat dijalankan dengan tanggal akhir sebelum tanggal awal.
 - [x] Menambahkan test regresi untuk validasi rentang galeri dan ekspor yang dapat dijalankan sepenuhnya di Manus.
+- [x] Menambahkan pengumuman aksesibel untuk perubahan status validasi, loading, dan hasil filter pada galeri serta ekspor.
