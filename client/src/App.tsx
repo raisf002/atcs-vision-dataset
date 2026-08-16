@@ -14,7 +14,7 @@ import Home from "./pages/Home";
 
 function Router() {
   return (
-    <DashboardLayout demoMode>
+    <DashboardLayout>
       <Switch>
         <Route path={"/"} component={Home} />
         <Route path={"/cameras/:cameraId"} component={CameraDetail} />
