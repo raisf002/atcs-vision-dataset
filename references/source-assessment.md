@@ -8,4 +8,8 @@ Temuan ini mengonfirmasi jumlah entri yang diperlukan oleh aplikasi. Dialog pemu
 
 Konsekuensinya, URL stream bukan JPEG langsung. Untuk menghasilkan snapshot yang benar, proses capture harus mengekstrak satu frame dari HLS atau menggunakan endpoint snapshot resmi apabila tersedia. Aplikasi akan tetap menyimpan metadata sumber secara konfigurabel per kamera dan tidak akan mengasumsikan pola URL tanpa verifikasi untuk semua kamera.
 
+Skrip halaman publik yang relevan untuk menelusuri konfigurasi kamera adalah `https://atcs.tasikmalayakota.go.id/script/home.js`, dengan pemutar Clappr dimuat dari CDN. Penelusuran lanjutan harus membaca skrip tersebut sebagai data untuk mengonfirmasi URL masing-masing stream sebelum kamera diaktifkan.
+
+Konfigurasi global `cctv` pada halaman publik saat diperiksa memetakan seluruh **29** nama kamera ke endpoint HLS pada domain yang sama. Semua endpoint tersebut dapat dipakai sebagai URL sumber terkonfigurasi dalam registry, tetapi setiap kamera tetap dinonaktifkan sampai ada pemeriksaan kesehatan stream dan persetujuan untuk mengaktifkan capture.
+
 Sumber: halaman live streaming ATCS Kota Tasikmalaya (diakses 16 Agustus 2026).

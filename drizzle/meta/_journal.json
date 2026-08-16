@@ -8,6 +8,20 @@
       "when": 1786872328260,
       "tag": "0000_flimsy_husk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786873369539,
+      "tag": "0001_fantastic_lilandra",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786873413180,
+      "tag": "0002_stiff_sway",
+      "breakpoints": true
     }
   ]
 }

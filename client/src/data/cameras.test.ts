@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { cameraRegistry, makeSnapshotStorageKey } from "./cameras";
+import { cameraRegistry } from "./cameras";
+import { makeSnapshotStorageKey } from "@shared/dataset";
 
 describe("camera registry", () => {
   it("contains exactly the 29 ATCS Tasikmalaya camera entries", () => {
@@ -10,7 +11,7 @@ describe("camera registry", () => {
   });
 
   it("builds S3 keys in the required camera/date/timestamp structure", () => {
-    expect(makeSnapshotStorageKey("cimulu", "2026-08-16", "2026-08-16T09-30-00Z"))
-      .toBe("cimulu/2026-08-16/2026-08-16T09-30-00Z.jpg");
+    expect(makeSnapshotStorageKey("cimulu", new Date("2026-08-16T09:30:00.000Z")))
+      .toBe("cimulu/2026-08-16/2026-08-16T09-30-00-000Z.jpg");
   });
 });

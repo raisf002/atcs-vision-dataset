@@ -16,3 +16,9 @@
 - [x] Membuat prototipe front end berisi data status representatif yang secara jelas ditandai sebagai pratinjau sampai capture produksi tersambung.
 - [x] Membuat navigasi dashboard untuk Overview, Cameras, Dataset Gallery, Exports, dan Settings tanpa dead-end antarmuka.
 - [x] Menyempurnakan semua layar utama untuk alur desktop dan seluler sebelum integrasi capture HLS dimulai.
+- [ ] Menambahkan endpoint server terautentikasi untuk menerima snapshot dan metadata dari worker capture eksternal.
+- [ ] Membuat worker Linux berbasis FFmpeg dengan batas paralel, timeout stream, retry, dan key snapshot S3 yang tepat.
+- [ ] Menyiapkan konfigurasi layanan systemd dan timer untuk menjalankan worker berdasarkan interval aktif.
+- [ ] Menyediakan konfigurasi rahasia worker dan dokumentasi koneksi server tanpa mengekspos kredensial di klien.
+- [ ] Menjalankan uji capture satu kamera lalu uji batch dengan pelaporan error per kamera.
+- [ ] Mengaktifkan kembali integrasi worker capture hanya jika pengguna secara eksplisit meminta otomasi snapshot produksi.

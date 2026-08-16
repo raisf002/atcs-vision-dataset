@@ -4,7 +4,7 @@ type StatusPillProps = {
 };
 
 const statusStyles = {
-  verified: { label: "Terverifikasi", className: "bg-emerald-50 text-emerald-800 ring-emerald-700/15", dot: "bg-emerald-500" },
+  verified: { label: "Terkonfigurasi", className: "bg-emerald-50 text-emerald-800 ring-emerald-700/15", dot: "bg-emerald-500" },
   pending: { label: "Perlu sumber", className: "bg-amber-50 text-amber-800 ring-amber-700/15", dot: "bg-amber-500" },
   active: { label: "Aktif", className: "bg-lime-100 text-lime-950 ring-lime-700/15", dot: "bg-lime-600" },
   paused: { label: "Nonaktif", className: "bg-stone-100 text-stone-600 ring-stone-600/10", dot: "bg-stone-400" },

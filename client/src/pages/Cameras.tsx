@@ -39,11 +39,11 @@ export default function Cameras() {
       <section className="grid gap-4 rounded-[1.35rem] border border-amber-200 bg-amber-50/70 p-5 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
           <p className="text-sm font-semibold text-amber-950">Mode konfigurasi awal</p>
-          <p className="mt-1 text-sm leading-6 text-amber-800">Satu sumber HLS telah terverifikasi dari situs publik. Selesaikan URL sumber pada 28 entri lain sebelum mengaktifkan capture produksi.</p>
+          <p className="mt-1 text-sm leading-6 text-amber-800">Seluruh URL HLS telah dipetakan dari konfigurasi live streaming publik. Lakukan health check stream sebelum mengaktifkan capture produksi.</p>
         </div>
         <div className="rounded-xl border border-amber-200 bg-white/70 px-4 py-3 text-right">
-          <p className="text-2xl font-semibold tracking-tight text-amber-950">1 / 29</p>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">sumber diverifikasi</p>
+          <p className="text-2xl font-semibold tracking-tight text-amber-950">29 / 29</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">sumber terkonfigurasi</p>
         </div>
       </section>
 
