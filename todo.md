@@ -69,3 +69,5 @@
 - [x] Menambahkan validasi rentang tanggal pada ekspor agar unduhan ZIP tidak dapat dijalankan dengan tanggal akhir sebelum tanggal awal.
 - [x] Menambahkan test regresi untuk validasi rentang galeri dan ekspor yang dapat dijalankan sepenuhnya di Manus.
 - [x] Menambahkan pengumuman aksesibel untuk perubahan status validasi, loading, dan hasil filter pada galeri serta ekspor.
+- [x] Membuat seluruh entri Camera registry dapat diklik untuk membuka detail CCTV dan konfigurasi per kamera.
+- [x] Memverifikasi pada pratinjau dan test DOM bahwa klik baris Camera registry membuka detail CCTV, sementara toggle dan tautan aksi tetap independen.
