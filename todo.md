@@ -86,3 +86,6 @@
 - [x] Memperjelas state kosong dan error pada galeri dengan arahan memilih filter lain, menjalankan capture, atau mencoba ulang metadata.
 - [x] Menambahkan ringkasan kesehatan capture pada dashboard yang membedakan berhasil, gagal karena sumber HLS, menunggu, dan nonaktif.
 - [x] Menambahkan regresi untuk ringkasan kesehatan capture serta memverifikasi tampilannya di pratinjau desktop dan seluler.
+- [x] Menyelaraskan label status sumber pada ringkasan dashboard dengan hasil capture HLS terbaru agar tidak menampilkan stream gagal sebagai sekadar terkonfigurasi.
+- [x] Menambahkan regresi rendering status ringkasan dashboard untuk capture berhasil, sumber HLS gagal, dan pipeline worker gagal.
+- [x] Menambahkan skenario DOM kamera capture berhasil agar label sumber terkonfigurasi pada ringkasan dashboard ikut terlindungi oleh regresi.
