@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { appRouter } from "./routers";
+import type { TrpcContext } from "./_core/context";
 import { ATCS_CAMERA_SEED } from "../shared/atcsCameras";
 import { buildDailySnapshotSeries, CAPTURE_INTERVALS, isCaptureInterval, makeSnapshotStorageKey } from "../shared/dataset";
 
@@ -24,5 +26,29 @@ describe("dataset foundation contracts", () => {
   it("builds a contiguous daily series and fills days without capture", () => {
     expect(buildDailySnapshotSeries([{ date: "2026-08-14", count: 4 }, { date: "2026-08-16", count: 2 }], 3, new Date("2026-08-16T12:00:00Z")))
       .toEqual([{ date: "2026-08-14", count: 4 }, { date: "2026-08-15", count: 0 }, { date: "2026-08-16", count: 2 }]);
+  });
+});
+
+
+describe("dataset admin access", () => {
+  it("rejects non-admin users before changing camera configuration", async () => {
+    const user = {
+      id: 7,
+      openId: "regular-user",
+      name: "Regular User",
+      email: "regular@example.com",
+      loginMethod: "manus",
+      role: "user" as const,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastSignedIn: new Date(),
+    };
+    const caller = appRouter.createCaller({
+      user,
+      req: {} as TrpcContext["req"],
+      res: {} as TrpcContext["res"],
+    });
+
+    await expect(caller.dataset.updateCamera({ id: "cimulu", isActive: true })).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });
