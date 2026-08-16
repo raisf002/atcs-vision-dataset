@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSnapshotQueryInput } from "./datasetQuery";
+import { buildSnapshotQueryInput, getSnapshotFilterError } from "./datasetQuery";
 
 describe("buildSnapshotQueryInput", () => {
   it("uses the full dataset when no date filter is selected", () => {
@@ -24,5 +24,12 @@ describe("buildSnapshotQueryInput", () => {
     expect(morning).not.toEqual(later);
     expect(morning).toMatchObject({ from: new Date("2026-08-16T08:00:00.000Z"), to: new Date("2026-08-16T09:00:59.999Z") });
     expect(later).toMatchObject({ from: new Date("2026-08-16T10:00:00.000Z"), to: new Date("2026-08-16T11:00:59.999Z") });
+  });
+
+  it("rejects an end time earlier than the start time for a dated filter", () => {
+    expect(getSnapshotFilterError({ cameraId: "cimulu", date: "2026-08-16", startTime: "18:00", endTime: "09:00" }))
+      .toBe("Waktu akhir harus sama dengan atau setelah waktu awal.");
+    expect(getSnapshotFilterError({ cameraId: "cimulu", date: "2026-08-16", startTime: "09:00", endTime: "09:00" }))
+      .toBeNull();
   });
 });

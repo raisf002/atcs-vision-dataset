@@ -5,6 +5,11 @@ export type SnapshotFilter = {
   endTime: string;
 };
 
+export function getSnapshotFilterError({ date, startTime, endTime }: SnapshotFilter) {
+  if (date && startTime > endTime) return "Waktu akhir harus sama dengan atau setelah waktu awal.";
+  return null;
+}
+
 export function buildSnapshotQueryInput({ cameraId, date, startTime, endTime }: SnapshotFilter) {
   const selectedCamera = cameraId === "all" ? undefined : cameraId;
   if (!date) return { cameraId: selectedCamera, limit: 120 };

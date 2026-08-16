@@ -65,3 +65,6 @@
 - [x] Mengekstrak dan menguji pembentukan URL ekspor ZIP agar filter kamera serta rentang tanggal diteruskan dengan benar.
 - [x] Menyelaraskan keterangan UI ekspor dengan perilaku streaming ZIP saat ini agar tidak mengklaim audit arsip yang belum dipersistenkan.
 - [x] Merapikan output test fallback statistik harian dengan menangkap peringatan yang memang diharapkan dan memverifikasinya secara eksplisit.
+- [x] Menambahkan validasi rentang waktu pada galeri agar waktu akhir yang lebih awal tidak mengirim query snapshot yang tidak valid.
+- [x] Menambahkan validasi rentang tanggal pada ekspor agar unduhan ZIP tidak dapat dijalankan dengan tanggal akhir sebelum tanggal awal.
+- [x] Menambahkan test regresi untuk validasi rentang galeri dan ekspor yang dapat dijalankan sepenuhnya di Manus.
