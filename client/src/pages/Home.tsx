@@ -1,33 +1,48 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import MetricCard from "@/components/MetricCard";
+import PageHeader from "@/components/PageHeader";
+import StatusPill from "@/components/StatusPill";
+import { cameraRegistry } from "@/data/cameras";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
+import { Activity, ArrowUpRight, Camera, CircleDotDashed, Database, FolderArchive, Images, Link2, RefreshCw, Route, Settings2, ShieldCheck } from "lucide-react";
+import { Link } from "wouter";
+import { toast } from "sonner";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
+const readinessStages = [
+  { label: "Registry", detail: "29 kamera terdaftar", status: "verified" as const, progress: "complete" },
+  { label: "Source validation", detail: "1 HLS diverifikasi · 28 menunggu URL", status: "pending" as const, progress: "active" },
+  { label: "Capture schedule", detail: "Belum diaktifkan", status: "paused" as const, progress: "upcoming" },
+  { label: "Dataset storage", detail: "Menunggu capture pertama", status: "empty" as const, progress: "upcoming" },
+];
+
 export default function Home() {
-  // The useAuth hook provides authentication state.
-  // To implement login/logout, call logout(), or start login from an event
-  // handler: onClick={() => startLogin()} (imported from "@/const"). Never call
-  // startLogin() during render (no href={startLogin()}) — it mints a one-time
-  // nonce cookie and must run only at the moment of navigation.
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
-
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+  const verifiedSources = cameraRegistry.filter((camera) => camera.sourceStatus === "verified").length;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
+    <div className="mx-auto w-full max-w-[1500px] space-y-7">
+      <PageHeader
+        eyebrow="Overview · Tasikmalaya"
+        title="Vision dataset command center"
+        description="Satu workspace untuk menata sumber CCTV ATCS, memantau kesiapan capture, dan mempersiapkan dataset trafik yang dapat ditelusuri untuk pelatihan AI."
+        actions={<><span className="inline-flex h-10 items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-semibold text-amber-800"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" />Capture standby</span><Button variant="outline" onClick={() => toast.info("Status sumber diperbarui saat integrasi capture aktif.")} className="h-10 rounded-xl border-stone-200 bg-white text-stone-700"><RefreshCw className="mr-2 h-3.5 w-3.5" />Refresh</Button></>}
+      />
+
+      <section className="overflow-hidden rounded-[1.6rem] bg-[#16332e] text-white shadow-[0_24px_55px_-38px_rgba(18,45,39,0.8)]">
+        <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:p-9">
+          <div><div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-lime-200"><CircleDotDashed className="h-3.5 w-3.5" />capture readiness</div><p className="mt-5 max-w-xl text-3xl font-semibold leading-tight tracking-[-0.045em] sm:text-4xl">Bangun fondasi dataset yang bersih, terstruktur, dan siap dilatih.</p><p className="mt-4 max-w-2xl text-sm leading-6 text-stone-300">Front end sudah memetakan seluruh 29 kamera dan kontrak penyimpanan. Tahap berikutnya adalah melengkapi sumber HLS lalu menghubungkan worker pengambilan frame yang aman.</p><div className="mt-7 flex flex-wrap gap-3"><Link href="/cameras" className="inline-flex h-10 items-center rounded-xl bg-lime-300 px-4 text-sm font-semibold text-lime-950 transition-transform duration-150 ease-out hover:bg-lime-200 active:scale-[0.97]">Lengkapi sumber <ArrowUpRight className="ml-2 h-4 w-4" /></Link><Link href="/settings" className="inline-flex h-10 items-center rounded-xl border border-white/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-white/10">Buka pengaturan</Link></div></div>
+          <div className="surface-grid-dark rounded-[1.25rem] border border-white/10 bg-white/[0.045] p-5"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-300">Capture plan</p><Activity className="h-4 w-4 text-lime-300" /></div><div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-white/10"><div className="bg-[#16332e] p-4"><p className="text-3xl font-semibold tracking-[-0.04em]">29</p><p className="mt-1 text-[11px] text-stone-300">kamera registry</p></div><div className="bg-[#16332e] p-4"><p className="text-3xl font-semibold tracking-[-0.04em]">0</p><p className="mt-1 text-[11px] text-stone-300">kamera aktif</p></div><div className="bg-[#16332e] p-4"><p className="text-3xl font-semibold tracking-[-0.04em]">—</p><p className="mt-1 text-[11px] text-stone-300">interval</p></div><div className="bg-[#16332e] p-4"><p className="text-3xl font-semibold tracking-[-0.04em]">0 B</p><p className="mt-1 text-[11px] text-stone-300">storage usage</p></div></div><p className="mt-5 border-t border-white/10 pt-4 font-mono text-[10px] text-lime-200">camera_id/YYYY-MM-DD/timestamp.jpg</p></div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><MetricCard label="Cameras" value="29" note="20 Jalan Kota · 9 Jalan Nasional" icon={Camera} tone="lime" /><MetricCard label="Verified sources" value={`${verifiedSources}`} note="1 HLS terverifikasi · 28 perlu konfigurasi" icon={Link2} tone="blue" /><MetricCard label="Snapshots" value="0" note="Pipeline capture masih standby" icon={Images} tone="coral" /><MetricCard label="Dataset storage" value="0 B" note="Belum ada objek yang disimpan" icon={Database} tone="ink" /></section>
+
+      <section className="rounded-[1.5rem] border border-stone-200 bg-white p-5 shadow-[0_18px_45px_-35px_rgba(28,32,30,0.5)] sm:p-6"><div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700">Capture telemetry</p><h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-stone-950">Daily capture count</h2><p className="mt-1 text-sm text-stone-500">Grafik akan terisi otomatis begitu job capture mulai menulis metadata snapshot.</p></div><span className="font-mono text-[11px] text-stone-400">UTC · last 7 days</span></div><div className="mt-7 grid h-36 grid-cols-7 items-end gap-3 border-b border-stone-200 bg-[linear-gradient(to_top,rgba(23,54,47,0.045)_1px,transparent_1px)] bg-[size:100%_33.333%] px-1">{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => <div key={day} className="flex h-full flex-col items-center justify-end gap-2"><div className="w-full rounded-t-md border border-dashed border-stone-200 bg-stone-50/60" style={{ height: "4px" }} /><span className="text-[10px] font-semibold text-stone-400">{day}</span></div>)}</div><div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2"><span className="text-xs text-stone-500">Tidak ada capture tersimpan pada periode ini.</span><Link href="/settings" className="text-xs font-semibold text-emerald-800 hover:text-emerald-950">Atur interval capture</Link></div></section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <article className="rounded-[1.5rem] border border-stone-200 bg-white p-5 shadow-[0_18px_45px_-35px_rgba(28,32,30,0.5)] sm:p-6"><div className="flex items-center justify-between"><div><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700">Pipeline readiness</p><h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-stone-950">From stream to training sample</h2></div><Route className="h-5 w-5 text-stone-300" /></div><div className="mt-8 space-y-5">{readinessStages.map((stage, index) => <div key={stage.label} className="grid grid-cols-[28px_1fr_auto] gap-3"><div className="relative flex justify-center"><span className={`mt-0.5 grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold ${stage.progress === "complete" ? "bg-lime-300 text-lime-950" : stage.progress === "active" ? "bg-amber-100 text-amber-900" : "bg-stone-100 text-stone-400"}`}>{index + 1}</span>{index < readinessStages.length - 1 ? <span className="absolute top-8 h-7 w-px bg-stone-200" /> : null}</div><div><p className="text-sm font-semibold text-stone-800">{stage.label}</p><p className="mt-0.5 text-xs text-stone-500">{stage.detail}</p></div><StatusPill status={stage.status} /></div>)}</div></article>
+        <article className="rounded-[1.5rem] border border-stone-200 bg-[#eff4ef] p-5 sm:p-6"><div className="flex items-start justify-between"><div><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700">Dataset standards</p><h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-stone-950">Siap untuk proses berikutnya</h2></div><ShieldCheck className="h-5 w-5 text-emerald-700" /></div><div className="mt-7 space-y-3">{[["Organized storage", "Prefix per kamera dan per tanggal untuk pencarian stabil."], ["Traceable export", "Setiap ZIP akan merekam filter kamera dan rentang waktu."], ["Vision-first metadata", "Fondasi untuk anotasi, deteksi, dan evaluasi model."]].map(([title, detail]) => <div key={title} className="rounded-xl border border-emerald-900/10 bg-white/70 p-3"><p className="text-sm font-semibold text-stone-800">{title}</p><p className="mt-1 text-xs leading-5 text-stone-600">{detail}</p></div>)}</div><Link href="/exports" className="mt-5 inline-flex items-center text-sm font-semibold text-emerald-800 hover:text-emerald-950">Rancang ekspor dataset <FolderArchive className="ml-2 h-4 w-4" /></Link></article>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-stone-200 bg-white p-5 shadow-[0_18px_45px_-35px_rgba(28,32,30,0.5)] sm:p-6"><div className="flex flex-col gap-3 border-b border-stone-100 pb-5 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700">Registry snapshot</p><h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] text-stone-950">Kamera membutuhkan konfigurasi sumber</h2></div><Link href="/cameras" className="inline-flex items-center text-sm font-semibold text-stone-700 hover:text-stone-950">Buka registry <ArrowUpRight className="ml-2 h-4 w-4" /></Link></div><div className="mt-2 divide-y divide-stone-100">{cameraRegistry.slice(0, 5).map((camera) => <div key={camera.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-stone-100 text-stone-600"><Camera className="h-4 w-4" /></span><div><p className="text-sm font-semibold text-stone-800">{camera.name}</p><p className="mt-0.5 font-mono text-[10px] text-stone-400">{camera.id}</p></div></div><div className="flex items-center gap-3"><span className="text-xs text-stone-500">{camera.zone}</span><StatusPill status={camera.sourceStatus} /></div></div>)}</div></section>
     </div>
   );
 }

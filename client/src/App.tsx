@@ -1,20 +1,29 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import DashboardLayout from "@/components/DashboardLayout";
+import Cameras from "@/pages/Cameras";
+import DatasetGallery from "@/pages/DatasetGallery";
+import Exports from "@/pages/Exports";
 import NotFound from "@/pages/NotFound";
+import Settings from "@/pages/Settings";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <DashboardLayout demoMode>
+      <Switch>
+        <Route path={"/"} component={Home} />
+        <Route path={"/cameras"} component={Cameras} />
+        <Route path={"/dataset"} component={DatasetGallery} />
+        <Route path={"/exports"} component={Exports} />
+        <Route path={"/settings"} component={Settings} />
+        <Route path={"/404"} component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </DashboardLayout>
   );
 }
 

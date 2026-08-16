@@ -1,0 +1,18 @@
+# Project TODO
+
+- [ ] Membatasi registri pada tepat 29 entri kamera ATCS Tasikmalaya dengan nama, URL sumber, dan status aktif/nonaktif yang dapat dikelola.
+- [ ] Membuat konfigurasi interval pengambilan 1, 5, 10, atau 15 menit dengan validasi dan kontrol aktif/jeda.
+- [ ] Menerapkan handler capture terjadwal yang idempoten dan mencatat setiap percobaan untuk semua kamera aktif.
+- [ ] Menyimpan gambar snapshot ke S3 dengan key wajib `camera_id/YYYY-MM-DD/timestamp.jpg` serta metadata capture di basis data.
+- [ ] Menyediakan dashboard monitoring untuk status terakhir, jumlah gambar per kamera, error terbaru, dan ringkasan koleksi.
+- [ ] Menyediakan galeri dataset dengan filter kamera, tanggal, serta rentang waktu dan tampilan snapshot terbaru.
+- [ ] Menyediakan ekspor ZIP berdasarkan kamera dan rentang tanggal tanpa menyimpan arsip sementara di server.
+- [ ] Menampilkan statistik dataset: jumlah per kamera, grafik capture harian, dan estimasi penggunaan penyimpanan.
+- [ ] Menerapkan UI dashboard yang elegan, responsif, aksesibel, dan konsisten di semua halaman.
+- [ ] Menambahkan kontrol akses admin untuk perubahan kamera, jadwal, dan ekspor dataset.
+- [ ] Menulis pengujian unit untuk validasi konfigurasi, pembentukan key S3, filter dataset, dan aturan ekspor.
+- [ ] Memverifikasi alur aplikasi di peramban, menangani kegagalan sumber kamera, dan menyelesaikan checklist sebelum rilis.
+- [x] Mendesain sistem visual bertema traffic-command yang elegan, dengan token warna, tipografi, dan responsivitas yang konsisten.
+- [x] Membuat prototipe front end berisi data status representatif yang secara jelas ditandai sebagai pratinjau sampai capture produksi tersambung.
+- [x] Membuat navigasi dashboard untuk Overview, Cameras, Dataset Gallery, Exports, dan Settings tanpa dead-end antarmuka.
+- [x] Menyempurnakan semua layar utama untuk alur desktop dan seluler sebelum integrasi capture HLS dimulai.
