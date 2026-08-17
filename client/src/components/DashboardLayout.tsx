@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Archive, Camera, Gauge, GalleryVerticalEnd, LayoutDashboard, LogOut, PanelLeft, Settings2 } from "lucide-react";
+import { Archive, Camera, Gauge, GalleryVerticalEnd, LayoutDashboard, LogOut, PanelLeft, Radar, Settings2 } from "lucide-react";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", path: "/" },
+  { icon: Radar, label: "Command center", path: "/command-center" },
   { icon: Camera, label: "Camera registry", path: "/cameras" },
   { icon: GalleryVerticalEnd, label: "Dataset gallery", path: "/dataset" },
   { icon: Archive, label: "Exports", path: "/exports" },

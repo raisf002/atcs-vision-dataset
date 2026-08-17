@@ -95,3 +95,10 @@
 - [x] Menambahkan regresi filter kesehatan Camera registry agar hasil pemfilteran status tetap akurat.
 - [x] Memisahkan filter Camera registry untuk kamera menunggu dan kamera nonaktif agar kedua status tidak tercampur.
 - [x] Menambahkan regresi unit dan DOM yang memverifikasi filter menunggu dan nonaktif secara independen.
+
+- [x] Membangun mode command center traffic vision dengan live CCTV utama, panel telemetri, dan toolbar pemantauan.
+- [x] Menambahkan tab navigasi Command Center terpisah tanpa mengganti Overview dan alur pengumpulan dataset yang ada.
+- [x] Menambahkan panel konfigurasi AI/video sebagai konfigurasi aman tanpa menjalankan inferensi produksi.
+- [x] Menambahkan tampilan peta/overview kamera ATCS yang terhubung dengan registry dan pemilihan kamera.
+- [x] Menambahkan regresi UI untuk command center, pemilihan kamera, panel konfigurasi, dan state sumber gagal.
+- [x] Memvalidasi command center pada desktop dan mobile, menjalankan test/check/build, lalu menyimpan checkpoint.
