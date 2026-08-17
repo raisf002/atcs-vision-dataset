@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { matchesCameraHealthFilter, type CameraHealthFilter } from "@/lib/cameraFilter";
 import { cameraDetailPath } from "@/lib/cameraRoutes";
-import { getCameraFailureLabel, getCameraSourceExplanation, getCameraSourceStatus } from "@/lib/cameraStatus";
+import { getCameraFailureLabel, getCameraSourceExplanation } from "@/lib/cameraStatus";
+import { getLivePlaybackRecords, subscribeLivePlayback } from "@/lib/livePlayback";
 import { trpc } from "@/lib/trpc";
 import { captureStatusLabels, captureStatusStyles } from "@shared/captureStatus";
 import { Camera, ChevronDown, Link2, Search, SlidersHorizontal } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
 
@@ -24,10 +25,19 @@ const healthFilterOptions: { label: string; value: CameraHealthFilter }[] = [
   { label: "Nonaktif", value: "disabled" },
 ];
 
+function getCaptureHistoryLabel(lastCaptureStatus: string, lastError?: string | null) {
+  if (lastCaptureStatus !== "failed") return null;
+  const failureLabel = getCameraFailureLabel("failed", lastError);
+  if (failureLabel === "Sumber HLS gagal") return "Riwayat capture: segmen HLS belum terbaca";
+  if (failureLabel === "Gangguan HLS sementara") return "Riwayat capture: gangguan HLS sementara";
+  return failureLabel ? `Riwayat capture: ${failureLabel}` : null;
+}
+
 export default function Cameras() {
   const [query, setQuery] = useState("");
   const [zone, setZone] = useState<ZoneFilter>("Semua");
   const [healthFilter, setHealthFilter] = useState<CameraHealthFilter>("all");
+  const [livePlaybackRecords, setLivePlaybackRecords] = useState(() => getLivePlaybackRecords());
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const cameraQuery = trpc.dataset.cameras.useQuery();
@@ -35,6 +45,8 @@ export default function Cameras() {
   const cameras = cameraQuery.data ?? [];
   const configuredSources = cameras.filter((camera) => camera.sourceStatus === "verified").length;
   const isAdmin = user?.role === "admin";
+
+  useEffect(() => subscribeLivePlayback(() => setLivePlaybackRecords(getLivePlaybackRecords())), []);
 
   const filteredCameras = useMemo(() => cameras.filter((camera) => {
     const matchesQuery = camera.name.toLowerCase().includes(query.toLowerCase()) || camera.id.includes(query.toLowerCase());
@@ -117,7 +129,7 @@ export default function Cameras() {
                     </div>
                   </td>
                   <td className="px-4 py-4"><span className="text-xs font-medium text-stone-600">{camera.zone === "city" ? "Jalan Kota" : "Jalan Nasional"}</span></td>
-                  <td className="px-4 py-4"><div className="flex min-w-[270px] flex-col items-start gap-1"><div className="flex items-center gap-2"><StatusPill status={getCameraSourceStatus(camera.sourceStatus, camera.lastCaptureStatus)} /><span className="max-w-[210px] truncate font-mono text-[10px] text-stone-400">{camera.sourceUrl ?? "URL belum diatur"}</span></div>{getCameraFailureLabel(camera.lastCaptureStatus, camera.lastError) ? <span className={`text-[10px] font-semibold ${getCameraFailureLabel(camera.lastCaptureStatus, camera.lastError) === "Sumber HLS gagal" ? "text-orange-700" : "text-red-700"}`}>{getCameraFailureLabel(camera.lastCaptureStatus, camera.lastError)}</span> : null}{getCameraSourceExplanation(camera.sourceStatus, camera.lastCaptureStatus, camera.lastError) ? <span className="text-[10px] leading-4 text-stone-500">{getCameraSourceExplanation(camera.sourceStatus, camera.lastCaptureStatus, camera.lastError)}</span> : null}</div></td>
+                  <td className="px-4 py-4"><div className="flex min-w-[270px] flex-col items-start gap-1"><div className="flex items-center gap-2"><StatusPill status={camera.sourceStatus} /><span className="max-w-[210px] truncate font-mono text-[10px] text-stone-400">{camera.sourceUrl ?? "URL belum diatur"}</span></div>{livePlaybackRecords[camera.id] ? <span className="text-[10px] font-semibold text-emerald-700">Live view terverifikasi di peramban</span> : getCaptureHistoryLabel(camera.lastCaptureStatus, camera.lastError) ? <span className={`text-[10px] font-semibold ${getCameraFailureLabel(camera.lastCaptureStatus, camera.lastError) === "Pipeline worker gagal" ? "text-red-700" : "text-orange-700"}`}>{getCaptureHistoryLabel(camera.lastCaptureStatus, camera.lastError)}</span> : null}{camera.sourceStatus !== "verified" && getCameraSourceExplanation(camera.sourceStatus, "pending", null) ? <span className="text-[10px] leading-4 text-stone-500">{getCameraSourceExplanation(camera.sourceStatus, "pending", null)}</span> : null}</div></td>
                   <td className="px-4 py-4"><div className="flex items-center gap-2"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${captureStatusStyles[camera.lastCaptureStatus]}`}>{captureStatusLabels[camera.lastCaptureStatus]}</span><span className="text-[10px] text-stone-400">{camera.lastCaptureAt ? new Date(camera.lastCaptureAt).toLocaleString("id-ID") : camera.captureIntervalMinutes ? `${camera.captureIntervalMinutes} min` : "belum berjalan"}</span></div></td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-2">

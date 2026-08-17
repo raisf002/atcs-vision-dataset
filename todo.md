@@ -109,3 +109,7 @@
 - [x] Menambahkan regresi detail CCTV untuk label, penjelasan, dan tindakan pemulihan gangguan HLS sementara.
 - [x] Menyelaraskan alert detail CCTV dengan status live player agar kegagalan capture historis tidak diklaim sebagai HLS gagal saat ini.
 - [x] Menambahkan regresi status live tersedia dengan riwayat capture gagal agar keterangan UI tetap akurat.
+- [x] Menyelaraskan status Camera Registry dengan keberhasilan live view aktual untuk kamera yang telah diputar.
+- [x] Menambahkan regresi agar Camera Registry membedakan riwayat capture gagal dari sumber yang sedang tersedia.
+- [x] Menyimpan sinyal keberhasilan live view terbaru per kamera agar Camera Registry dapat mengikuti status playback aktual.
+- [x] Menambahkan regresi perubahan status Camera Registry yang dipicu oleh sinyal live playback, bukan hanya konfigurasi statis.

@@ -1,8 +1,9 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React, { type ReactNode } from "react";
+import { clearLivePlaybackRecords, recordLivePlayback } from "@/lib/livePlayback";
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -48,6 +49,7 @@ import Cameras from "./Cameras";
 
 afterEach(() => {
   cleanup();
+  clearLivePlaybackRecords();
   vi.clearAllMocks();
   mocks.cameras = [{
     ...mocks.cameras[0],
@@ -69,7 +71,7 @@ describe("Camera registry interactions", () => {
     expect(mocks.navigate).toHaveBeenCalledWith("/cameras/cimulu");
   });
 
-  it("renders different explanations for source, pending, and pipeline failures", () => {
+  it("keeps configured sources separate from capture history and pending configuration", () => {
     mocks.cameras = [
       { ...mocks.cameras[0], id: "hls-failed", name: "HLS Failed", lastCaptureStatus: "failed", lastError: "Error when loading first segment .ts" },
       { ...mocks.cameras[0], id: "not-tested", name: "Not Tested", sourceStatus: "pending", lastCaptureStatus: "pending", lastError: null },
@@ -77,9 +79,10 @@ describe("Camera registry interactions", () => {
     ];
     render(<Cameras />);
 
-    expect(screen.getByText("Sumber HLS gagal")).toBeTruthy();
+    expect(screen.getAllByText("Terkonfigurasi").length).toBeGreaterThan(0);
+    expect(screen.getByText("Riwayat capture: segmen HLS belum terbaca")).toBeTruthy();
     expect(screen.getByText("URL HLS belum diuji oleh worker.")).toBeTruthy();
-    expect(screen.getByText("Pipeline worker gagal")).toBeTruthy();
+    expect(screen.getByText("Riwayat capture: Pipeline worker gagal")).toBeTruthy();
   });
 
   it("renders exhausted HLS segment retries as a temporary disruption", () => {
@@ -92,8 +95,17 @@ describe("Camera registry interactions", () => {
     }];
     render(<Cameras />);
 
-    expect(screen.getByText("Gangguan HLS sementara")).toBeTruthy();
-    expect(screen.getByText(/Worker akan mencoba ulang secara otomatis/)).toBeTruthy();
+    expect(screen.getByText("Riwayat capture: gangguan HLS sementara")).toBeTruthy();
+  });
+
+  it("replaces historical capture warning with a recent live playback signal", async () => {
+    mocks.cameras = [{ ...mocks.cameras[0], lastCaptureStatus: "failed", lastError: "Error when loading first segment .ts" }];
+    render(<Cameras />);
+
+    recordLivePlayback("cimulu");
+
+    await waitFor(() => expect(screen.getByText("Live view terverifikasi di peramban")).toBeTruthy());
+    expect(screen.queryByText("Riwayat capture: segmen HLS belum terbaca")).toBeNull();
   });
 
   it("filters the registry by capture health without hiding the source diagnosis", async () => {
@@ -110,7 +122,7 @@ describe("Camera registry interactions", () => {
     await user.click(screen.getByRole("button", { name: /HLS gagal: 1 kamera/ }));
 
     expect(screen.getByText("HLS Failed")).toBeTruthy();
-    expect(screen.getByText("Sumber HLS gagal")).toBeTruthy();
+    expect(screen.getByText("Riwayat capture: segmen HLS belum terbaca")).toBeTruthy();
     expect(screen.queryByText("Healthy")).toBeNull();
     expect(screen.queryByText("Pipeline Failed")).toBeNull();
 
