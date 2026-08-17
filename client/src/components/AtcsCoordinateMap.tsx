@@ -3,6 +3,7 @@ import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
 import { ATCS_CAMERA_COORDINATES } from "@shared/atcsCoordinates";
 import { buildCoordinatePopup, getCoordinateStatusLabel } from "@/lib/coordinateMap";
+import { EARTH_ATTRIBUTION, EARTH_TILE_URL } from "@/lib/earthBasemap";
 
 type CameraPoint = {
   id: string;
@@ -28,7 +29,7 @@ export default function AtcsCoordinateMap({ cameras, selectedId, onSelect }: Atc
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, { zoomControl: false, attributionControl: true, scrollWheelZoom: true });
     L.control.zoom({ position: "bottomright" }).addTo(map);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
+    L.tileLayer(EARTH_TILE_URL, { maxZoom: 19, attribution: EARTH_ATTRIBUTION }).addTo(map);
     map.setView([-7.326, 108.219], 13);
     mapRef.current = map;
     markerLayerRef.current = L.layerGroup().addTo(map);

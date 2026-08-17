@@ -124,3 +124,7 @@
 
 - [x] Menambahkan field eksplisit verificationStatus pada model koordinat dan menggunakannya pada peta.
 - [x] Menambahkan regresi utilitas marker/popup yang memverifikasi pemilihan kamera dan label koordinat tanpa hanya memock peta.
+- [x] Mengganti basemap Command Center menjadi tampilan Earth/satelit tanpa mengubah koordinat marker CCTV.
+- [x] Menambahkan regresi konfigurasi basemap Earth dan memverifikasi marker tetap dapat dipilih.
+- [x] Menambahkan regresi peta Leaflet nyata yang membuktikan marker memanggil onSelect serta memakai popup koordinat pada basemap Earth.
+- [x] Menjalankan validasi penuh setelah regresi interaksi marker Earth ditambahkan.
