@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import React, { type ReactNode } from "react";
+import userEvent from "@testing-library/user-event";
 
 const defaultCamera = {
   id: "cimulu",
@@ -32,7 +33,7 @@ vi.mock("@/lib/trpc", () => ({
   },
 }));
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ user: { role: "admin" } }) }));
-vi.mock("@/components/LiveHlsPlayer", () => ({ default: ({ cameraName }: { cameraName: string }) => <div data-testid="live-player">Live {cameraName}</div> }));
+vi.mock("@/components/LiveHlsPlayer", () => ({ default: ({ cameraName, onPlaybackStatusChange }: { cameraName: string; onPlaybackStatusChange?: (status: "playing") => void }) => <button type="button" onClick={() => onPlaybackStatusChange?.("playing")}>Simulasikan live {cameraName}</button> }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("wouter", () => ({
   Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => <a href={href} {...props}>{children}</a>,
@@ -53,6 +54,18 @@ describe("Camera detail failure diagnostics", () => {
 
     expect(screen.getByText("Sumber HLS gagal")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Muat ulang live view" })).toBeTruthy();
+  });
+
+  it("shows the live source as available when playback succeeds despite an earlier capture failure", async () => {
+    const user = userEvent.setup();
+    render(<CameraDetail />);
+
+    await user.click(screen.getByRole("button", { name: "Simulasikan live Simpang Cimulu" }));
+
+    expect(screen.getByText("Live view tersedia sekarang")).toBeTruthy();
+    expect(screen.getByText(/Stream HLS berhasil diputar di peramban ini/)).toBeTruthy();
+    expect(screen.getByText(/Riwayat capture sebelumnya: sumber hls gagal/)).toBeTruthy();
+    expect(screen.queryByText("Sumber HLS gagal")).toBeNull();
   });
 
   it("treats exhausted HLS segment retries as a temporary source disruption", () => {

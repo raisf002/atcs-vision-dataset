@@ -6,12 +6,15 @@ import { useEffect, useRef, useState } from "react";
 type LiveHlsPlayerProps = {
   sourceUrl: string | null;
   cameraName: string;
+  onPlaybackStatusChange?: (status: "loading" | "playing" | "error" | "empty") => void;
 };
 
-export default function LiveHlsPlayer({ sourceUrl, cameraName }: LiveHlsPlayerProps) {
+export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusChange }: LiveHlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [status, setStatus] = useState<"loading" | "playing" | "error" | "empty">(sourceUrl ? "loading" : "empty");
   const [message, setMessage] = useState("Menyiapkan stream live…");
+
+  useEffect(() => onPlaybackStatusChange?.(status), [onPlaybackStatusChange, status]);
 
   const startPlayback = () => {
     const video = videoRef.current;

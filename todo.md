@@ -107,3 +107,5 @@
 - [x] Menambahkan regresi worker dan status kamera untuk skenario kegagalan segmen HLS yang dapat dipulihkan.
 - [x] Menyelaraskan detail CCTV agar gangguan HLS sementara menggunakan tindakan muat ulang live view, bukan tindakan pipeline.
 - [x] Menambahkan regresi detail CCTV untuk label, penjelasan, dan tindakan pemulihan gangguan HLS sementara.
+- [x] Menyelaraskan alert detail CCTV dengan status live player agar kegagalan capture historis tidak diklaim sebagai HLS gagal saat ini.
+- [x] Menambahkan regresi status live tersedia dengan riwayat capture gagal agar keterangan UI tetap akurat.
