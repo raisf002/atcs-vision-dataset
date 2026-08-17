@@ -130,3 +130,5 @@
 - [x] Menjalankan validasi penuh setelah regresi interaksi marker Earth ditambahkan.
 - [x] Menambahkan kontrol Earth/Jalan pada peta Command Center dengan Earth sebagai pilihan awal.
 - [x] Menambahkan regresi pergantian basemap yang memastikan marker kamera tetap interaktif.
+- [x] Membuka peta langsung pada bounds yang mencakup seluruh titik CCTV resmi di Tasikmalaya.
+- [x] Menambahkan regresi framing awal dan memastikan pergantian Earth/Jalan tidak mengubah zoom pengguna.

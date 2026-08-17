@@ -31,7 +31,8 @@ export default function AtcsCoordinateMap({ cameras, selectedId, onSelect }: Atc
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, { zoomControl: false, attributionControl: true, scrollWheelZoom: true });
     L.control.zoom({ position: "bottomright" }).addTo(map);
-    map.setView([-7.326, 108.219], 13);
+    const officialBounds = L.latLngBounds(ATCS_CAMERA_COORDINATES.map((point) => [point.latitude, point.longitude] as [number, number]));
+    map.fitBounds(officialBounds.pad(0.12), { animate: false, maxZoom: 14 });
     mapRef.current = map;
     markerLayerRef.current = L.layerGroup().addTo(map);
     return () => {
@@ -61,10 +62,8 @@ export default function AtcsCoordinateMap({ cameras, selectedId, onSelect }: Atc
     if (!map || !markerLayer) return;
     markerLayer.clearLayers();
     const points = cameras.map((camera) => ({ camera, point: officialByName.get(camera.name) })).filter((item) => item.point);
-    const bounds = L.latLngBounds([]);
     points.forEach(({ camera, point }) => {
       if (!point) return;
-      bounds.extend([point.latitude, point.longitude]);
       const selected = camera.id === selectedId;
       const color = camera.lastCaptureStatus === "success" ? "#a3e635" : camera.lastCaptureStatus === "failed" ? "#fb923c" : "#94a3b8";
       const marker = L.circleMarker([point.latitude, point.longitude], { radius: selected ? 10 : 7, color: selected ? "#f8fafc" : color, weight: selected ? 3 : 2, fillColor: color, fillOpacity: 0.95 });
@@ -73,7 +72,6 @@ export default function AtcsCoordinateMap({ cameras, selectedId, onSelect }: Atc
       marker.on("click", () => onSelect(camera.id));
       marker.addTo(markerLayer);
     });
-    if (points.length && cameraSignature) map.fitBounds(bounds.pad(0.12), { animate: false, maxZoom: 14 });
     containerRef.current?.setAttribute("data-coordinate-status", getCoordinateStatusLabel(points[0]?.point));
     window.setTimeout(() => map.invalidateSize(), 0);
   }, [cameraSignature, cameras, onSelect, selectedId]);

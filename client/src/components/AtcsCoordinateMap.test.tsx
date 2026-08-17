@@ -38,8 +38,10 @@ describe("AtcsCoordinateMap", () => {
 
     expect(L.tileLayer).toHaveBeenCalledWith(EARTH_TILE_URL, expect.objectContaining({ attribution: expect.stringContaining("Esri") }));
     expect(marker.bindPopup).toHaveBeenCalledWith(expect.stringContaining("-7.321100, 108.221297"));
+    expect(mapInstance.fitBounds).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole("button", { name: "Jalan" }));
     expect(L.tileLayer).toHaveBeenCalledWith(STREET_TILE_URL, expect.objectContaining({ attribution: expect.stringContaining("OpenStreetMap") }));
+    expect(mapInstance.fitBounds).toHaveBeenCalledTimes(1);
     act(() => markerState.click?.());
     expect(onSelect).toHaveBeenCalledWith("cimulu");
   });
