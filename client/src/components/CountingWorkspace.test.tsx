@@ -1,11 +1,11 @@
 /** @vitest-environment jsdom */
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   invalidate: vi.fn(),
-  config: { cameraId: "cimulu", modelId: "model_yolo", isEnabled: false, confidenceThreshold: 35, virtualLines: [], classFilter: ["car", "truck", "bus", "motorcycle"] },
+  config: { cameraId: "cimulu", modelId: "model_yolo", isEnabled: false, confidenceThreshold: 35, virtualLines: [] as Array<{ id: string; name: string; start: { x: number; y: number }; end: { x: number; y: number }; direction: "both"; enabled: boolean }>, classFilter: ["car", "truck", "bus", "motorcycle"] },
   models: [{ id: "model_yolo", name: "YOLO Kendaraan", framework: "yolo", fileName: "traffic.pt", sizeBytes: 2048, status: "ready" }],
   loading: false,
   error: null as Error | null,
@@ -26,22 +26,40 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 import CountingWorkspace from "./CountingWorkspace";
 
 describe("CountingWorkspace", () => {
+  afterEach(() => {
+    cleanup();
+    mocks.loading = false;
+    mocks.error = null;
+    mocks.config.virtualLines = [];
+  });
+
   it("menunjukkan state memuat dan error yang jelas sebelum konfigurasi tersedia", () => {
     mocks.loading = true;
-    const { rerender } = render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} />);
+    const { rerender } = render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay" isConsoleActive={false} onOpenConsole={vi.fn()} />);
     expect(screen.getByText(/Memuat konfigurasi counting/)).toBeTruthy();
     mocks.loading = false;
     mocks.error = new Error("network");
-    rerender(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} />);
+    rerender(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay" isConsoleActive={false} onOpenConsole={vi.fn()} />);
     expect(screen.getByRole("alert").textContent).toContain("Konfigurasi counting belum dapat dimuat");
     mocks.error = null;
   });
 
-  it("menyimpan garis virtual dan model khusus untuk kamera yang dipilih", async () => {
-    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} />);
+  it("mengarahkan operator untuk membuka konsol saat live video belum aktif", () => {
+    const onOpenConsole = vi.fn();
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay" isConsoleActive={false} onOpenConsole={onOpenConsole} />);
+    fireEvent.click(screen.getByRole("button", { name: /Buka konsol kamera untuk edit di live video/ }));
+    expect(onOpenConsole).toHaveBeenCalledTimes(1);
+  });
+
+  it("menyimpan garis virtual yang dibuat langsung pada overlay live video untuk kamera yang dipilih", async () => {
+    const portal = document.createElement("div");
+    portal.id = "overlay";
+    document.body.appendChild(portal);
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay" isConsoleActive onOpenConsole={vi.fn()} />);
     await waitFor(() => expect(screen.getByText(/YOLO Kendaraan/)).toBeTruthy());
 
-    const canvas = screen.getByLabelText(/Bidang anotasi garis virtual/);
+    fireEvent.click(screen.getByRole("button", { name: /Edit garis langsung di live video/ }));
+    const canvas = await screen.findByLabelText(/Bidang tambah garis pada live video/);
     Object.defineProperty(canvas, "getBoundingClientRect", { value: () => ({ left: 0, top: 0, width: 1000, height: 562 }) });
     fireEvent.click(canvas, { clientX: 100, clientY: 200 });
     fireEvent.click(canvas, { clientX: 800, clientY: 350 });
@@ -53,5 +71,48 @@ describe("CountingWorkspace", () => {
       modelId: "model_yolo",
       virtualLines: [expect.objectContaining({ start: { x: 0.1, y: expect.any(Number) }, end: { x: 0.8, y: expect.any(Number) } })],
     }));
+    portal.remove();
+  });
+
+  it("memuat kembali garis tersimpan pada overlay live video kamera", async () => {
+    mocks.config.virtualLines = [{
+      id: "line_cimulu_1",
+      name: "Arah masuk",
+      start: { x: 0.18, y: 0.45 },
+      end: { x: 0.82, y: 0.52 },
+      direction: "both",
+      enabled: true,
+    }];
+    const portal = document.createElement("div");
+    portal.id = "overlay-reload";
+    document.body.appendChild(portal);
+
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay-reload" isConsoleActive onOpenConsole={vi.fn()} />);
+
+    await waitFor(() => expect(portal.querySelector("line")).toBeTruthy());
+    expect(screen.getByText("Arah masuk")).toBeTruthy();
+    portal.remove();
+  });
+
+  it("memilih garis pada overlay live lalu menyorot kartu detail garis yang sama", async () => {
+    mocks.config.virtualLines = [{
+      id: "line_cimulu_selected",
+      name: "Arah keluar",
+      start: { x: 0.2, y: 0.35 },
+      end: { x: 0.74, y: 0.6 },
+      direction: "both",
+      enabled: true,
+    }];
+    const portal = document.createElement("div");
+    portal.id = "overlay-select";
+    document.body.appendChild(portal);
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay-select" isConsoleActive onOpenConsole={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Pilih garis Arah keluar" })).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: "Pilih garis Arah keluar" }));
+
+    expect(screen.getByRole("button", { name: "Pilih garis Arah keluar" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Dipilih di overlay live")).toBeTruthy();
+    portal.remove();
   });
 });

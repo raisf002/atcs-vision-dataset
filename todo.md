@@ -144,3 +144,8 @@
 - [x] Menambahkan regresi integrasi simpan/muat konfigurasi counting dua kamera yang terpisah.
 - [x] Menambahkan regresi upload model admin dengan helper registri nyata dan penyimpanan database terkontrol yang dapat dibaca ulang.
 - [x] Menambahkan regresi counting dua kamera yang memetakan hasil berdasarkan cameraId query, bukan urutan panggilan.
+- [x] Mengganti bidang anotasi terpisah dengan overlay garis virtual interaktif langsung di atas live CCTV.
+- [x] Menambahkan mode edit garis di atas video dengan penyimpanan koordinat frame per kamera.
+- [x] Menambahkan regresi overlay video untuk pembuatan garis, pemilihan garis, dan pemuatan ulang konfigurasi kamera.
+- [x] Menambahkan pemilihan garis aktif di atas live video serta menyorot garis yang dipilih.
+- [x] Menambahkan regresi pemilihan garis overlay dan sinkronisasinya dengan panel detail garis.

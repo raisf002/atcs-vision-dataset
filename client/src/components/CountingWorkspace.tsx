@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { DEFAULT_CLASS_FILTER, createDefaultCountingConfig, type NormalizedPoint, type VirtualCountingLine } from "@shared/counting";
 import { Check, Loader2, MousePointer2, Save, Trash2, Upload, Waypoints } from "lucide-react";
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -21,7 +22,7 @@ function createLine(start: NormalizedPoint, end: NormalizedPoint): VirtualCounti
   };
 }
 
-function pointFromClick(event: React.MouseEvent<SVGSVGElement>): NormalizedPoint {
+function pointFromClick(event: React.MouseEvent<SVGSVGElement | SVGRectElement>): NormalizedPoint {
   const rect = event.currentTarget.getBoundingClientRect();
   return {
     x: Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width)),
@@ -33,7 +34,7 @@ function directionLabel(direction: VirtualCountingLine["direction"]) {
   return direction === "a_to_b" ? "A → B" : direction === "b_to_a" ? "B → A" : "Dua arah";
 }
 
-export default function CountingWorkspace({ camera }: { camera: CameraSelection }) {
+export default function CountingWorkspace({ camera, overlayTargetId, isConsoleActive, onOpenConsole }: { camera: CameraSelection; overlayTargetId: string; isConsoleActive: boolean; onOpenConsole: () => void }) {
   const utils = trpc.useUtils();
   const cameraId = camera?.id ?? "";
   const configQuery = trpc.dataset.countingConfig.useQuery({ cameraId }, { enabled: Boolean(cameraId) });
@@ -45,11 +46,20 @@ export default function CountingWorkspace({ camera }: { camera: CameraSelection 
   const [modelFramework, setModelFramework] = useState<ModelFramework>("yolo");
   const [labels, setLabels] = useState("car, truck, bus, motorcycle");
   const [uploading, setUploading] = useState(false);
+  const [isEditingOverlay, setIsEditingOverlay] = useState(false);
+  const [overlayTarget, setOverlayTarget] = useState<HTMLElement | null>(null);
+  const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
 
   useEffect(() => {
     if (configQuery.data) setConfig(configQuery.data);
     setPendingPoint(null);
+    setIsEditingOverlay(false);
+    setSelectedLineId(null);
   }, [cameraId, configQuery.data]);
+
+  useEffect(() => {
+    setOverlayTarget(isConsoleActive ? document.getElementById(overlayTargetId) : null);
+  }, [isConsoleActive, overlayTargetId]);
 
   const saveConfig = trpc.dataset.saveCountingConfig.useMutation({
     onSuccess: async (saved) => {
@@ -67,13 +77,15 @@ export default function CountingWorkspace({ camera }: { camera: CameraSelection 
     virtualLines: current.virtualLines.map((line) => line.id === id ? { ...line, ...patch } : line),
   }));
 
-  const handleCanvasClick = (event: React.MouseEvent<SVGSVGElement>) => {
+  const handleCanvasClick = (event: React.MouseEvent<SVGSVGElement | SVGRectElement>) => {
     const point = pointFromClick(event);
     if (!pendingPoint) {
       setPendingPoint(point);
       return;
     }
-    setConfig((current) => ({ ...current, virtualLines: [...current.virtualLines, createLine(pendingPoint, point)] }));
+    const line = createLine(pendingPoint, point);
+    setConfig((current) => ({ ...current, virtualLines: [...current.virtualLines, line] }));
+    setSelectedLineId(line.id);
     setPendingPoint(null);
   };
 
@@ -116,6 +128,17 @@ export default function CountingWorkspace({ camera }: { camera: CameraSelection 
 
   if (!camera) return null;
 
+  const lineOverlay = isConsoleActive && overlayTarget ? createPortal(
+    <div className={`absolute inset-0 ${isEditingOverlay ? "pointer-events-auto" : "pointer-events-none"}`}>
+      <svg viewBox="0 0 1000 562" role="button" tabIndex={isEditingOverlay ? 0 : -1} aria-label="Overlay editor garis virtual pada live video" className={`h-full w-full ${isEditingOverlay ? "cursor-crosshair" : ""}`}>
+        {isEditingOverlay ? <rect width="1000" height="562" fill="transparent" aria-label="Bidang tambah garis pada live video" onClick={handleCanvasClick} /> : null}
+        {config.virtualLines.map((line, index) => { const isSelected = line.id === selectedLineId; return <g key={line.id} opacity={line.enabled ? 1 : 0.35} role="button" aria-label={`Pilih garis ${line.name}`} aria-pressed={isSelected} onClick={(event) => { event.stopPropagation(); setSelectedLineId(line.id); }} className={isEditingOverlay ? "cursor-pointer" : ""}><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={isSelected ? "#ffffff" : index % 2 ? "#fb923c" : "#bef264"} strokeWidth={isSelected ? "13" : "7"} /><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={index % 2 ? "#fb923c" : "#bef264"} strokeWidth={isSelected ? "6" : "7"} /><circle cx={line.start.x * 1000} cy={line.start.y * 562} r={isSelected ? "12" : "9"} fill="#fff" /><circle cx={line.end.x * 1000} cy={line.end.y * 562} r={isSelected ? "12" : "9"} fill="#fff" /><text x={(line.start.x + line.end.x) * 500} y={(line.start.y + line.end.y) * 281 - 12} textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="700" paintOrder="stroke" stroke="#071012" strokeWidth="5">{line.name}</text></g>; })}
+        {isEditingOverlay ? <><rect x="24" y="24" width="250" height="42" rx="12" fill="#071012" fillOpacity="0.82" pointerEvents="none" /><text x="42" y="50" fill="#bef264" fontSize="18" fontWeight="700" pointerEvents="none">{pendingPoint ? "Pilih titik kedua" : "Klik titik pertama garis"}</text>{pendingPoint ? <circle cx={pendingPoint.x * 1000} cy={pendingPoint.y * 562} r="12" fill="#bef264" pointerEvents="none" /> : null}</> : null}
+      </svg>
+    </div>,
+    overlayTarget,
+  ) : null;
+
   if (configQuery.isLoading || modelsQuery.isLoading) {
     return <section className="rounded-xl border border-white/10 bg-[#101719] p-4" aria-live="polite"><div className="flex items-center gap-2 text-xs font-semibold text-stone-300"><Loader2 className="h-4 w-4 animate-spin text-lime-300" />Memuat konfigurasi counting dan registry model untuk {camera.name}…</div></section>;
   }
@@ -124,22 +147,14 @@ export default function CountingWorkspace({ camera }: { camera: CameraSelection 
     return <section className="rounded-xl border border-orange-300/25 bg-orange-300/5 p-4" role="alert"><p className="text-xs font-semibold text-orange-200">Konfigurasi counting belum dapat dimuat.</p><p className="mt-1 text-[10px] text-stone-400">Periksa koneksi atau coba muat ulang data sebelum mengubah garis virtual dan model.</p><Button type="button" variant="outline" onClick={() => { configQuery.refetch(); modelsQuery.refetch(); }} className="mt-3 border-orange-300/30 text-orange-100 hover:bg-orange-300/10">Coba muat ulang</Button></section>;
   }
 
-  return (
+  return <>
+    {lineOverlay}
     <div className="space-y-3">
       <section className="rounded-xl border border-white/10 bg-[#101719] p-4">
         <div className="flex items-center justify-between gap-2"><div><h2 className="flex items-center gap-2 text-xs font-bold text-white"><Waypoints className="h-3.5 w-3.5 text-lime-300" />Counting per kamera</h2><p className="mt-1 text-[10px] text-stone-500">{camera.name} · garis disimpan khusus untuk CCTV ini</p></div><span className="rounded bg-lime-300/10 px-2 py-1 text-[9px] font-bold text-lime-200">TERSIMPAN</span></div>
-        <div className="mt-4 overflow-hidden rounded-lg border border-white/10 bg-[#071012]">
-          <svg viewBox="0 0 1000 562" role="button" tabIndex={0} aria-label="Bidang anotasi garis virtual; klik dua titik untuk membuat garis" onClick={handleCanvasClick} className={`block aspect-video w-full touch-none ${pendingPoint ? "cursor-crosshair" : "cursor-cell"}`}>
-            <defs><pattern id="count-grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#ffffff" strokeOpacity="0.08" strokeWidth="1" /></pattern></defs>
-            <rect width="1000" height="562" fill="url(#count-grid)" />
-            <text x="32" y="42" fill="#94a3b8" fontSize="20">BIDANG ANOTASI · RASIO LIVE 16:9</text>
-            {config.virtualLines.map((line, index) => <g key={line.id} opacity={line.enabled ? 1 : 0.35}><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={index % 2 ? "#fb923c" : "#bef264"} strokeWidth="7" /><circle cx={line.start.x * 1000} cy={line.start.y * 562} r="9" fill="#fff" /><circle cx={line.end.x * 1000} cy={line.end.y * 562} r="9" fill="#fff" /><text x={(line.start.x + line.end.x) * 500} y={(line.start.y + line.end.y) * 281 - 12} textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="700">{line.name}</text></g>)}
-            {pendingPoint && <g><circle cx={pendingPoint.x * 1000} cy={pendingPoint.y * 562} r="12" fill="#bef264" /><text x={pendingPoint.x * 1000 + 20} y={pendingPoint.y * 562 - 18} fill="#bef264" fontSize="18">Pilih titik kedua</text></g>}
-          </svg>
-        </div>
-        <div className="mt-2 flex items-center gap-2 text-[10px] text-stone-500"><MousePointer2 className="h-3.5 w-3.5 text-lime-300" />{pendingPoint ? "Titik pertama dipilih. Klik titik kedua untuk menutup garis." : "Klik dua titik pada bidang anotasi untuk menambah garis virtual."}</div>
+        <div className="mt-3 rounded-lg border border-white/10 bg-black/15 p-3"><p className="text-[10px] text-stone-400">Garis ditampilkan dan digambar langsung di atas rasio frame live CCTV. Titik koordinat tersimpan relatif terhadap frame, sehingga dapat dibaca kembali oleh worker deteksi untuk kamera ini.</p>{isConsoleActive ? <Button type="button" variant={isEditingOverlay ? "default" : "outline"} onClick={() => { setIsEditingOverlay((value) => !value); setPendingPoint(null); }} className={`mt-3 w-full ${isEditingOverlay ? "bg-lime-300 text-slate-950 hover:bg-lime-200" : "border-white/10 text-stone-100 hover:bg-white/10"}`}><MousePointer2 className="mr-2 h-3.5 w-3.5" />{isEditingOverlay ? "Selesai mengedit garis di video" : "Edit garis langsung di live video"}</Button> : <Button type="button" variant="outline" onClick={onOpenConsole} className="mt-3 w-full border-white/10 text-stone-100 hover:bg-white/10">Buka konsol kamera untuk edit di live video</Button>}</div>
         <div className="mt-3 space-y-2">
-          {config.virtualLines.length === 0 ? <p className="rounded-lg border border-dashed border-white/10 p-3 text-[10px] text-stone-500">Belum ada garis virtual. Garis ini nantinya digunakan worker inferensi sebagai batas counting kendaraan.</p> : config.virtualLines.map((line, index) => <div key={line.id} className="rounded-lg border border-white/10 bg-black/15 p-2.5"><div className="flex items-center gap-2"><input value={line.name} onChange={(event) => updateLine(line.id, { name: event.target.value.slice(0, 80) })} aria-label={`Nama garis ${index + 1}`} className="min-w-0 flex-1 bg-transparent text-[11px] font-semibold text-white outline-none" /><button type="button" onClick={() => setConfig((current) => ({ ...current, virtualLines: current.virtualLines.filter((item) => item.id !== line.id) }))} aria-label={`Hapus ${line.name}`} className="text-stone-500 hover:text-red-300"><Trash2 className="h-3.5 w-3.5" /></button></div><div className="mt-2 flex items-center gap-2"><select value={line.direction} onChange={(event) => updateLine(line.id, { direction: event.target.value as VirtualCountingLine["direction"] })} aria-label={`Arah ${line.name}`} className="min-w-0 flex-1 rounded border border-white/10 bg-[#101719] px-2 py-1.5 text-[10px] text-stone-200"><option value="both">{directionLabel("both")}</option><option value="a_to_b">{directionLabel("a_to_b")}</option><option value="b_to_a">{directionLabel("b_to_a")}</option></select><button type="button" onClick={() => updateLine(line.id, { enabled: !line.enabled })} className={`rounded px-2 py-1.5 text-[10px] font-semibold ${line.enabled ? "bg-lime-300/10 text-lime-200" : "bg-white/5 text-stone-500"}`}>{line.enabled ? "Aktif" : "Jeda"}</button></div></div>)}
+          {config.virtualLines.length === 0 ? <p className="rounded-lg border border-dashed border-white/10 p-3 text-[10px] text-stone-500">Belum ada garis virtual. Garis ini nantinya digunakan worker inferensi sebagai batas counting kendaraan.</p> : config.virtualLines.map((line, index) => <div key={line.id} role="button" tabIndex={0} aria-pressed={line.id === selectedLineId} onClick={() => setSelectedLineId(line.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedLineId(line.id); }} className={`rounded-lg border p-2.5 transition-colors ${line.id === selectedLineId ? "border-lime-300/60 bg-lime-300/10" : "border-white/10 bg-black/15"}`}><div className="flex items-center gap-2"><input value={line.name} onClick={(event) => event.stopPropagation()} onChange={(event) => updateLine(line.id, { name: event.target.value.slice(0, 80) })} aria-label={`Nama garis ${index + 1}`} className="min-w-0 flex-1 bg-transparent text-[11px] font-semibold text-white outline-none" /><button type="button" onClick={(event) => { event.stopPropagation(); setSelectedLineId((current) => current === line.id ? null : current); setConfig((current) => ({ ...current, virtualLines: current.virtualLines.filter((item) => item.id !== line.id) })); }} aria-label={`Hapus ${line.name}`} className="text-stone-500 hover:text-red-300"><Trash2 className="h-3.5 w-3.5" /></button></div><div className="mt-2 flex items-center gap-2"><select value={line.direction} onClick={(event) => event.stopPropagation()} onChange={(event) => updateLine(line.id, { direction: event.target.value as VirtualCountingLine["direction"] })} aria-label={`Arah ${line.name}`} className="min-w-0 flex-1 rounded border border-white/10 bg-[#101719] px-2 py-1.5 text-[10px] text-stone-200"><option value="both">{directionLabel("both")}</option><option value="a_to_b">{directionLabel("a_to_b")}</option><option value="b_to_a">{directionLabel("b_to_a")}</option></select><button type="button" onClick={(event) => { event.stopPropagation(); updateLine(line.id, { enabled: !line.enabled }); }} className={`rounded px-2 py-1.5 text-[10px] font-semibold ${line.enabled ? "bg-lime-300/10 text-lime-200" : "bg-white/5 text-stone-500"}`}>{line.enabled ? "Aktif" : "Jeda"}</button></div><p className={`mt-2 text-[9px] font-semibold ${line.id === selectedLineId ? "text-lime-200" : "text-stone-600"}`}>{line.id === selectedLineId ? "Dipilih di overlay live" : "Klik untuk pilih pada panel atau overlay"}</p></div>)}
         </div>
       </section>
 
@@ -162,5 +177,5 @@ export default function CountingWorkspace({ camera }: { camera: CameraSelection 
         <Button type="button" variant="outline" onClick={uploadModel} disabled={uploading} className="mt-3 w-full border-white/10 text-stone-100 hover:bg-white/10"><Upload className="mr-2 h-3.5 w-3.5" />{uploading ? "Mengunggah…" : "Unggah model sebagai draf"}</Button>
       </section>
     </div>
-  );
+  </>;
 }

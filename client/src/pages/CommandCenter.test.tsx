@@ -35,9 +35,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/trpc", () => ({
   trpc: { dataset: { cameras: { useQuery: () => ({ data: mocks.cameras, refetch: mocks.refetch }) } } },
 }));
-vi.mock("@/components/LiveHlsPlayer", () => ({ default: ({ cameraName }: { cameraName: string }) => <div data-testid="live-player">Live view {cameraName}</div> }));
+vi.mock("@/components/LiveHlsPlayer", () => ({ default: ({ cameraName, overlaySlotId }: { cameraName: string; overlaySlotId?: string }) => <div data-testid="live-player" data-overlay-slot={overlaySlotId}>Live view {cameraName}</div> }));
 vi.mock("@/components/AtcsCoordinateMap", () => ({ default: ({ cameras, onSelect }: { cameras: Array<{ id: string; name: string }>; onSelect: (id: string) => void }) => <div data-testid="coordinate-map">{cameras.map((camera) => <button key={camera.id} aria-label={`Pilih ${camera.name}`} onClick={() => onSelect(camera.id)}>{camera.name}</button>)}</div> }));
-vi.mock("@/components/CountingWorkspace", () => ({ default: ({ camera }: { camera?: { name: string } }) => <div data-testid="counting-workspace">Counting untuk {camera?.name}</div> }));
+vi.mock("@/components/CountingWorkspace", () => ({ default: ({ camera, overlayTargetId, isConsoleActive }: { camera?: { name: string }; overlayTargetId: string; isConsoleActive: boolean }) => <div data-testid="counting-workspace" data-overlay-target={overlayTargetId} data-console-active={String(isConsoleActive)}>Counting untuk {camera?.name}</div> }));
 vi.mock("sonner", () => ({ toast: { info: vi.fn(), success: vi.fn() } }));
 vi.mock("wouter", () => ({ Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => <a href={href} {...props}>{children}</a> }));
 
@@ -70,6 +70,9 @@ describe("CommandCenter", () => {
 
     expect(screen.getByText(/Counting setup: DIBUKA/)).toBeTruthy();
     expect(screen.getByTestId("counting-workspace").textContent).toContain("Simpang Alpha");
+    expect(screen.getByTestId("live-player").getAttribute("data-overlay-slot")).toBe("counting-overlay-alpha");
+    expect(screen.getByTestId("counting-workspace").getAttribute("data-overlay-target")).toBe("counting-overlay-alpha");
+    expect(screen.getByTestId("counting-workspace").getAttribute("data-console-active")).toBe("true");
   });
 
   it("labels failed captures as historical records rather than current live-source failures", () => {
