@@ -128,3 +128,5 @@
 - [x] Menambahkan regresi konfigurasi basemap Earth dan memverifikasi marker tetap dapat dipilih.
 - [x] Menambahkan regresi peta Leaflet nyata yang membuktikan marker memanggil onSelect serta memakai popup koordinat pada basemap Earth.
 - [x] Menjalankan validasi penuh setelah regresi interaksi marker Earth ditambahkan.
+- [x] Menambahkan kontrol Earth/Jalan pada peta Command Center dengan Earth sebagai pilihan awal.
+- [x] Menambahkan regresi pergantian basemap yang memastikan marker kamera tetap interaktif.
