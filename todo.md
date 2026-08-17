@@ -115,3 +115,9 @@
 - [x] Menambahkan regresi perubahan status Camera Registry yang dipicu oleh sinyal live playback, bukan hanya konfigurasi statis.
 - [x] Mengganti istilah ringkasan sumber/pipeline gagal menjadi riwayat capture gagal yang tidak menyiratkan gangguan live saat ini.
 - [x] Menambahkan regresi label ringkasan agar konteks historis kegagalan capture tetap jelas.
+
+- [ ] Menelusuri sumber koordinat publik dari halaman live ATCS Tasikmalaya dan mencatat tingkat verifikasinya.
+- [ ] Menambahkan model koordinat kamera beserta status verified/unverified tanpa mengarang lokasi yang tidak tersedia.
+- [ ] Mengganti peta indeks Command Center dengan peta koordinat nyata atau state transparan jika sumber koordinat publik tidak tersedia.
+- [ ] Menambahkan regresi interaksi peta, pemilihan marker, dan label koordinat.
+- [ ] Menjalankan validasi penuh dan menyimpan checkpoint peta koordinat Command Center.

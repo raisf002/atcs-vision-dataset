@@ -36,6 +36,7 @@ vi.mock("@/lib/trpc", () => ({
   trpc: { dataset: { cameras: { useQuery: () => ({ data: mocks.cameras, refetch: mocks.refetch }) } } },
 }));
 vi.mock("@/components/LiveHlsPlayer", () => ({ default: ({ cameraName }: { cameraName: string }) => <div data-testid="live-player">Live view {cameraName}</div> }));
+vi.mock("@/components/AtcsCoordinateMap", () => ({ default: ({ cameras, onSelect }: { cameras: Array<{ id: string; name: string }>; onSelect: (id: string) => void }) => <div data-testid="coordinate-map">{cameras.map((camera) => <button key={camera.id} aria-label={`Pilih ${camera.name}`} onClick={() => onSelect(camera.id)}>{camera.name}</button>)}</div> }));
 vi.mock("sonner", () => ({ toast: { info: vi.fn(), success: vi.fn() } }));
 vi.mock("wouter", () => ({ Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => <a href={href} {...props}>{children}</a> }));
 
