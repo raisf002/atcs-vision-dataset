@@ -2,6 +2,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
 import { ATCS_CAMERA_COORDINATES } from "@shared/atcsCoordinates";
+import { buildCoordinatePopup, getCoordinateStatusLabel } from "@/lib/coordinateMap";
 
 type CameraPoint = {
   id: string;
@@ -52,11 +53,12 @@ export default function AtcsCoordinateMap({ cameras, selectedId, onSelect }: Atc
       const color = camera.lastCaptureStatus === "success" ? "#a3e635" : camera.lastCaptureStatus === "failed" ? "#fb923c" : "#94a3b8";
       const marker = L.circleMarker([point.latitude, point.longitude], { radius: selected ? 10 : 7, color: selected ? "#f8fafc" : color, weight: selected ? 3 : 2, fillColor: color, fillOpacity: 0.95 });
       marker.bindTooltip(camera.name, { direction: "top", offset: [0, -6], opacity: 0.95 });
-      marker.bindPopup(`<strong>${camera.name}</strong><br/><span>Koordinat terverifikasi</span><br/><code>${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}</code>`);
+      marker.bindPopup(buildCoordinatePopup(point));
       marker.on("click", () => onSelect(camera.id));
       marker.addTo(markerLayer);
     });
     if (points.length && cameraSignature) map.fitBounds(bounds.pad(0.12), { animate: false, maxZoom: 14 });
+    containerRef.current?.setAttribute("data-coordinate-status", getCoordinateStatusLabel(points[0]?.point));
     window.setTimeout(() => map.invalidateSize(), 0);
   }, [cameraSignature, cameras, onSelect, selectedId]);
 

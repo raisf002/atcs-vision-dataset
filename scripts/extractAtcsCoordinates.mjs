@@ -14,12 +14,13 @@ const entries = Object.values(cctv).map((camera) => ({
   cameraType: camera.jenis.toLowerCase(),
   latitude: Number(camera.lokasi_lat),
   longitude: Number(camera.lokasi_lng),
+  verificationStatus: "verified",
   source: "https://atcs.tasikmalayakota.go.id/#lokasi",
 }));
 if (entries.length !== 29) throw new Error(`Expected 29 official cameras, found ${entries.length}`);
 const names = new Set(entries.map((entry) => entry.name));
 if (names.size !== entries.length) throw new Error("Duplicate official camera name found");
 const body = JSON.stringify(entries, null, 2).replaceAll('"', '"');
-const output = `export type AtcsCameraCoordinate = {\n  officialId: string;\n  name: string;\n  zone: "city" | "national";\n  sourceUrl: string;\n  cameraType: "ptz" | "fix";\n  latitude: number;\n  longitude: number;\n  source: string;\n};\n\n/** Coordinates published by the official ATCS Tasikmalaya Lokasi Leaflet map. */\nexport const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = ${body};\n`;
+const output = `export type AtcsCameraCoordinate = {\n  officialId: string;\n  name: string;\n  zone: "city" | "national";\n  sourceUrl: string;\n  cameraType: "ptz" | "fix";\n  latitude: number;\n  longitude: number;\n  verificationStatus: "verified" | "unverified";\n  source: string;\n};\n\n/** Coordinates published by the official ATCS Tasikmalaya Lokasi Leaflet map. */\nexport const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = ${body};\n`;
 fs.writeFileSync(outputPath, output);
 console.log(`Extracted ${entries.length} verified ATCS camera coordinates to ${outputPath}`);

@@ -6,6 +6,7 @@ export type AtcsCameraCoordinate = {
   cameraType: "ptz" | "fix";
   latitude: number;
   longitude: number;
+  verificationStatus: "verified" | "unverified";
   source: string;
 };
 
@@ -19,6 +20,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.30405798,
     "longitude": 108.20548296,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -29,6 +31,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.31573718,
     "longitude": 108.21582556,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -39,6 +42,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.31782823,
     "longitude": 108.19884181,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -49,6 +53,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.28333264,
     "longitude": 108.19812298,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -59,6 +64,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.28314108,
     "longitude": 108.1980747,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -69,6 +75,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.31983946,
     "longitude": 108.2199347,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -79,6 +86,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.32110046,
     "longitude": 108.22129726,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -89,6 +97,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.3258252,
     "longitude": 108.22079837,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -99,6 +108,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.32757569,
     "longitude": 108.22712302,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -109,6 +119,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.27380239,
     "longitude": 108.19348812,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -119,6 +130,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.28802586,
     "longitude": 108.20033312,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -129,6 +141,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.28782898,
     "longitude": 108.20052624,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -139,6 +152,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.32348299,
     "longitude": 108.221383,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -149,6 +163,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.32334046,
     "longitude": 108.22167277,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -159,6 +174,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.33444986,
     "longitude": 108.21906567,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -169,6 +185,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.31804106,
     "longitude": 108.22813153,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -179,6 +196,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.32683612,
     "longitude": 108.22484314,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -189,6 +207,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.32684144,
     "longitude": 108.22468758,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -199,6 +218,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.3268042,
     "longitude": 108.22466612,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -209,6 +229,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.322939,
     "longitude": 108.215706,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -219,6 +240,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.31824857,
     "longitude": 108.19898665,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -229,6 +251,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.31827517,
     "longitude": 108.19899738,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -239,6 +262,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.33084554,
     "longitude": 108.21940362,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -249,6 +273,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.33067529,
     "longitude": 108.21973622,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -259,6 +284,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.33245617,
     "longitude": 108.21920782,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -269,6 +295,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.33264771,
     "longitude": 108.21917027,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -279,6 +306,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.33389191,
     "longitude": 108.21521401,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -289,6 +317,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "fix",
     "latitude": -7.34821456,
     "longitude": 108.21789622,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   },
   {
@@ -299,6 +328,7 @@ export const ATCS_CAMERA_COORDINATES: AtcsCameraCoordinate[] = [
     "cameraType": "ptz",
     "latitude": -7.331533,
     "longitude": 108.222395,
+    "verificationStatus": "verified",
     "source": "https://atcs.tasikmalayakota.go.id/#lokasi"
   }
 ];

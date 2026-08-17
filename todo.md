@@ -116,8 +116,11 @@
 - [x] Mengganti istilah ringkasan sumber/pipeline gagal menjadi riwayat capture gagal yang tidak menyiratkan gangguan live saat ini.
 - [x] Menambahkan regresi label ringkasan agar konteks historis kegagalan capture tetap jelas.
 
-- [ ] Menelusuri sumber koordinat publik dari halaman live ATCS Tasikmalaya dan mencatat tingkat verifikasinya.
-- [ ] Menambahkan model koordinat kamera beserta status verified/unverified tanpa mengarang lokasi yang tidak tersedia.
-- [ ] Mengganti peta indeks Command Center dengan peta koordinat nyata atau state transparan jika sumber koordinat publik tidak tersedia.
-- [ ] Menambahkan regresi interaksi peta, pemilihan marker, dan label koordinat.
-- [ ] Menjalankan validasi penuh dan menyimpan checkpoint peta koordinat Command Center.
+- [x] Menelusuri sumber koordinat publik dari halaman live ATCS Tasikmalaya dan mencatat tingkat verifikasinya.
+- [x] Menambahkan model koordinat kamera beserta status verified/unverified tanpa mengarang lokasi yang tidak tersedia.
+- [x] Mengganti peta indeks Command Center dengan peta koordinat nyata atau state transparan jika sumber koordinat publik tidak tersedia.
+- [x] Menambahkan regresi interaksi peta, pemilihan marker, dan label koordinat.
+- [x] Menjalankan validasi penuh dan menyimpan checkpoint peta koordinat Command Center.
+
+- [x] Menambahkan field eksplisit verificationStatus pada model koordinat dan menggunakannya pada peta.
+- [x] Menambahkan regresi utilitas marker/popup yang memverifikasi pemilihan kamera dan label koordinat tanpa hanya memock peta.
