@@ -153,3 +153,6 @@
 - [x] Menambahkan cakupan registry model: global untuk semua CCTV atau khusus untuk satu kamera.
 - [x] Menambahkan kontrol upload dan pemilih model yang menyaring model global serta model kamera aktif.
 - [x] Menambahkan regresi cakupan model dan penampilan garis overlay yang diperbarui.
+- [x] Menipiskan kembali garis virtual live agar tidak mengganggu visual CCTV.
+- [x] Menambahkan handle titik ujung yang dapat dipindahkan langsung pada overlay live video.
+- [x] Menambahkan regresi pemindahan titik garis dan penyimpanan geometri per kamera.

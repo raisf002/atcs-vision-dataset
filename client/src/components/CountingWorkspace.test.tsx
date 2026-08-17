@@ -139,7 +139,28 @@ describe("CountingWorkspace", () => {
     render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay-thin" isConsoleActive onOpenConsole={vi.fn()} />);
 
     await waitFor(() => expect(portal.querySelector('line[stroke="#bef264"]')).toBeTruthy());
-    expect(portal.querySelector('line[stroke="#bef264"]')?.getAttribute("stroke-width")).toBe("4");
+    expect(portal.querySelector('line[stroke="#bef264"]')?.getAttribute("stroke-width")).toBe("2");
+    portal.remove();
+  });
+
+  it("memindahkan titik ujung garis langsung pada overlay live lalu menyimpan geometri baru", async () => {
+    mocks.config.virtualLines = [{ id: "line_drag", name: "Jalur masuk", start: { x: 0.2, y: 0.3 }, end: { x: 0.8, y: 0.6 }, direction: "both", enabled: true }];
+    const portal = document.createElement("div");
+    portal.id = "overlay-drag";
+    document.body.appendChild(portal);
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay-drag" isConsoleActive onOpenConsole={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Pilih garis Jalur masuk" })).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: "Pilih garis Jalur masuk" }));
+    fireEvent.click(screen.getByRole("button", { name: /Edit garis langsung di live video/ }));
+    const overlay = screen.getByLabelText(/Overlay editor garis virtual pada live video/);
+    Object.defineProperty(overlay, "getBoundingClientRect", { value: () => ({ left: 0, top: 0, width: 1000, height: 562 }) });
+    fireEvent.pointerDown(screen.getByLabelText("Pindahkan titik awal Jalur masuk"), { pointerId: 1, clientX: 200, clientY: 170 });
+    fireEvent.pointerMove(overlay, { pointerId: 1, clientX: 420, clientY: 250 });
+    fireEvent.pointerUp(overlay, { pointerId: 1 });
+    fireEvent.click(screen.getByRole("button", { name: /Simpan konfigurasi kamera/ }));
+
+    expect(mocks.save).toHaveBeenCalledWith(expect.objectContaining({ virtualLines: [expect.objectContaining({ id: "line_drag", start: { x: 0.42, y: expect.any(Number) } })] }));
     portal.remove();
   });
 });

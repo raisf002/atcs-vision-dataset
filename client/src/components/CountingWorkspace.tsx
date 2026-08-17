@@ -23,8 +23,10 @@ function createLine(start: NormalizedPoint, end: NormalizedPoint): VirtualCounti
   };
 }
 
-function pointFromClick(event: React.MouseEvent<SVGSVGElement | SVGRectElement>): NormalizedPoint {
-  const rect = event.currentTarget.getBoundingClientRect();
+function pointFromElement(event: React.MouseEvent<SVGSVGElement | SVGRectElement> | React.PointerEvent<SVGSVGElement | SVGCircleElement>): NormalizedPoint {
+  const current = event.currentTarget;
+  const tagName = current.tagName.toLowerCase();
+  const rect = tagName === "svg" || tagName === "rect" ? current.getBoundingClientRect() : (current.ownerSVGElement?.getBoundingClientRect() ?? current.getBoundingClientRect());
   return {
     x: Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width)),
     y: Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height)),
@@ -51,12 +53,14 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
   const [isEditingOverlay, setIsEditingOverlay] = useState(false);
   const [overlayTarget, setOverlayTarget] = useState<HTMLElement | null>(null);
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
+  const [draggingEndpoint, setDraggingEndpoint] = useState<{ lineId: string; endpoint: "start" | "end" } | null>(null);
 
   useEffect(() => {
     if (configQuery.data) setConfig(configQuery.data);
     setPendingPoint(null);
     setIsEditingOverlay(false);
     setSelectedLineId(null);
+    setDraggingEndpoint(null);
   }, [cameraId, configQuery.data]);
 
   useEffect(() => {
@@ -80,7 +84,7 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
   }));
 
   const handleCanvasClick = (event: React.MouseEvent<SVGSVGElement | SVGRectElement>) => {
-    const point = pointFromClick(event);
+    const point = pointFromElement(event);
     if (!pendingPoint) {
       setPendingPoint(point);
       return;
@@ -90,6 +94,21 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
     setSelectedLineId(line.id);
     setPendingPoint(null);
   };
+
+  const startEndpointDrag = (event: React.PointerEvent<SVGCircleElement>, lineId: string, endpoint: "start" | "end") => {
+    event.stopPropagation();
+    if (typeof event.currentTarget.setPointerCapture === "function") event.currentTarget.setPointerCapture(event.pointerId);
+    setSelectedLineId(lineId);
+    setPendingPoint(null);
+    setDraggingEndpoint({ lineId, endpoint });
+  };
+
+  const moveEndpoint = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!draggingEndpoint) return;
+    updateLine(draggingEndpoint.lineId, { [draggingEndpoint.endpoint]: pointFromElement(event) });
+  };
+
+  const finishEndpointDrag = () => setDraggingEndpoint(null);
 
   const save = () => {
     if (!cameraId) return;
@@ -134,10 +153,10 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
 
   const lineOverlay = isConsoleActive && overlayTarget ? createPortal(
     <div className={`absolute inset-0 ${isEditingOverlay ? "pointer-events-auto" : "pointer-events-none"}`}>
-      <svg viewBox="0 0 1000 562" role="button" tabIndex={isEditingOverlay ? 0 : -1} aria-label="Overlay editor garis virtual pada live video" className={`h-full w-full ${isEditingOverlay ? "cursor-crosshair" : ""}`}>
+      <svg viewBox="0 0 1000 562" role="button" tabIndex={isEditingOverlay ? 0 : -1} aria-label="Overlay editor garis virtual pada live video" onPointerMove={moveEndpoint} onPointerUp={finishEndpointDrag} onPointerCancel={finishEndpointDrag} className={`h-full w-full ${isEditingOverlay && !draggingEndpoint ? "cursor-crosshair" : ""}`}>
         {isEditingOverlay ? <rect width="1000" height="562" fill="transparent" aria-label="Bidang tambah garis pada live video" onClick={handleCanvasClick} /> : null}
-        {config.virtualLines.map((line, index) => { const isSelected = line.id === selectedLineId; return <g key={line.id} opacity={line.enabled ? 1 : 0.42} role="button" aria-label={`Pilih garis ${line.name}`} aria-pressed={isSelected} onClick={(event) => { event.stopPropagation(); setSelectedLineId(line.id); }} className={isEditingOverlay ? "cursor-pointer" : ""}><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={isSelected ? "#ffffff" : index % 2 ? "#fb923c" : "#bef264"} strokeWidth={isSelected ? "7" : "4"} /><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={index % 2 ? "#fb923c" : "#bef264"} strokeWidth={isSelected ? "3" : "4"} /><circle cx={line.start.x * 1000} cy={line.start.y * 562} r={isSelected ? "8" : "6"} fill="#fff" /><circle cx={line.end.x * 1000} cy={line.end.y * 562} r={isSelected ? "8" : "6"} fill="#fff" /><text x={(line.start.x + line.end.x) * 500} y={(line.start.y + line.end.y) * 281 - 10} textAnchor="middle" fill="#ffffff" fontSize="14" fontWeight="700" paintOrder="stroke" stroke="#071012" strokeWidth="3">{line.name}</text></g>; })}
-        {isEditingOverlay ? <><rect x="24" y="24" width="250" height="42" rx="12" fill="#071012" fillOpacity="0.82" pointerEvents="none" /><text x="42" y="50" fill="#bef264" fontSize="18" fontWeight="700" pointerEvents="none">{pendingPoint ? "Pilih titik kedua" : "Klik titik pertama garis"}</text>{pendingPoint ? <circle cx={pendingPoint.x * 1000} cy={pendingPoint.y * 562} r="12" fill="#bef264" pointerEvents="none" /> : null}</> : null}
+        {config.virtualLines.map((line, index) => { const isSelected = line.id === selectedLineId; const tone = index % 2 ? "#fb923c" : "#bef264"; return <g key={line.id} opacity={line.enabled ? 1 : 0.38} role="button" aria-label={`Pilih garis ${line.name}`} aria-pressed={isSelected} onClick={(event) => { event.stopPropagation(); setSelectedLineId(line.id); }} className={isEditingOverlay ? "cursor-pointer" : ""}><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={isSelected ? "#ffffff" : tone} strokeWidth={isSelected ? "4" : "2"} /><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={tone} strokeWidth={isSelected ? "1.5" : "2"} /><text x={(line.start.x + line.end.x) * 500} y={(line.start.y + line.end.y) * 281 - 8} textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="700" paintOrder="stroke" stroke="#071012" strokeWidth="2.5">{line.name}</text>{isSelected && isEditingOverlay ? <><circle cx={line.start.x * 1000} cy={line.start.y * 562} r="11" fill="#071012" fillOpacity="0.72" stroke={tone} strokeWidth="1.5" pointerEvents="none" /><circle cx={line.end.x * 1000} cy={line.end.y * 562} r="11" fill="#071012" fillOpacity="0.72" stroke={tone} strokeWidth="1.5" pointerEvents="none" /><circle cx={line.start.x * 1000} cy={line.start.y * 562} r="5" fill={tone} stroke="#ffffff" strokeWidth="1.5" aria-label={`Pindahkan titik awal ${line.name}`} onPointerDown={(event) => startEndpointDrag(event, line.id, "start")} className="cursor-grab active:cursor-grabbing" /><circle cx={line.end.x * 1000} cy={line.end.y * 562} r="5" fill={tone} stroke="#ffffff" strokeWidth="1.5" aria-label={`Pindahkan titik akhir ${line.name}`} onPointerDown={(event) => startEndpointDrag(event, line.id, "end")} className="cursor-grab active:cursor-grabbing" /></> : null}</g>; })}
+        {isEditingOverlay ? <><rect x="24" y="24" width="300" height="42" rx="12" fill="#071012" fillOpacity="0.82" pointerEvents="none" /><text x="42" y="50" fill="#bef264" fontSize="16" fontWeight="700" pointerEvents="none">{draggingEndpoint ? "Seret titik ujung garis" : pendingPoint ? "Pilih titik kedua" : selectedLineId ? "Seret titik ujung untuk edit" : "Klik titik pertama garis"}</text>{pendingPoint ? <circle cx={pendingPoint.x * 1000} cy={pendingPoint.y * 562} r="9" fill="#bef264" pointerEvents="none" /> : null}</> : null}
       </svg>
     </div>,
     overlayTarget,
@@ -156,9 +175,9 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
     <div className="space-y-3">
       <section className="rounded-xl border border-white/10 bg-[#101719] p-4">
         <div className="flex items-center justify-between gap-2"><div><h2 className="flex items-center gap-2 text-xs font-bold text-white"><Waypoints className="h-3.5 w-3.5 text-lime-300" />Counting per kamera</h2><p className="mt-1 text-[10px] text-stone-500">{camera.name} · garis disimpan khusus untuk CCTV ini</p></div><span className="rounded bg-lime-300/10 px-2 py-1 text-[9px] font-bold text-lime-200">TERSIMPAN</span></div>
-        <div className="mt-3 rounded-lg border border-white/10 bg-black/15 p-3"><p className="text-[10px] text-stone-400">Garis ditampilkan dan digambar langsung di atas rasio frame live CCTV. Titik koordinat tersimpan relatif terhadap frame, sehingga dapat dibaca kembali oleh worker deteksi untuk kamera ini.</p>{isConsoleActive ? <Button type="button" variant={isEditingOverlay ? "default" : "outline"} onClick={() => { setIsEditingOverlay((value) => !value); setPendingPoint(null); }} className={`mt-3 w-full ${isEditingOverlay ? "bg-lime-300 text-slate-950 hover:bg-lime-200" : "border-white/10 text-stone-100 hover:bg-white/10"}`}><MousePointer2 className="mr-2 h-3.5 w-3.5" />{isEditingOverlay ? "Selesai mengedit garis di video" : "Edit garis langsung di live video"}</Button> : <Button type="button" variant="outline" onClick={onOpenConsole} className="mt-3 w-full border-white/10 text-stone-100 hover:bg-white/10">Buka konsol kamera untuk edit di live video</Button>}</div>
+        <div className="mt-3 rounded-lg border border-white/10 bg-black/15 p-3"><p className="text-[10px] text-stone-400">Garis ditampilkan pada frame live CCTV. Saat mode edit aktif, pilih garis lalu seret titik ujungnya untuk memindahkan atau mengubah bentuk; nama, arah, status, dan penghapusan tetap tersedia di panel ini.</p>{isConsoleActive ? <Button type="button" variant={isEditingOverlay ? "default" : "outline"} onClick={() => { setIsEditingOverlay((value) => !value); setPendingPoint(null); setDraggingEndpoint(null); }} className={`mt-3 w-full ${isEditingOverlay ? "bg-lime-300 text-slate-950 hover:bg-lime-200" : "border-white/10 text-stone-100 hover:bg-white/10"}`}><MousePointer2 className="mr-2 h-3.5 w-3.5" />{isEditingOverlay ? "Selesai mengedit garis di video" : "Edit garis langsung di live video"}</Button> : <Button type="button" variant="outline" onClick={onOpenConsole} className="mt-3 w-full border-white/10 text-stone-100 hover:bg-white/10">Buka konsol kamera untuk edit di live video</Button>}</div>
         <div className="mt-3 space-y-2">
-          {config.virtualLines.length === 0 ? <p className="rounded-lg border border-dashed border-white/10 p-3 text-[10px] text-stone-500">Belum ada garis virtual. Garis ini nantinya digunakan worker inferensi sebagai batas counting kendaraan.</p> : config.virtualLines.map((line, index) => <div key={line.id} role="button" tabIndex={0} aria-pressed={line.id === selectedLineId} onClick={() => setSelectedLineId(line.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedLineId(line.id); }} className={`rounded-lg border p-2.5 transition-colors ${line.id === selectedLineId ? "border-lime-300/60 bg-lime-300/10" : "border-white/10 bg-black/15"}`}><div className="flex items-center gap-2"><input value={line.name} onClick={(event) => event.stopPropagation()} onChange={(event) => updateLine(line.id, { name: event.target.value.slice(0, 80) })} aria-label={`Nama garis ${index + 1}`} className="min-w-0 flex-1 bg-transparent text-[11px] font-semibold text-white outline-none" /><button type="button" onClick={(event) => { event.stopPropagation(); setSelectedLineId((current) => current === line.id ? null : current); setConfig((current) => ({ ...current, virtualLines: current.virtualLines.filter((item) => item.id !== line.id) })); }} aria-label={`Hapus ${line.name}`} className="text-stone-500 hover:text-red-300"><Trash2 className="h-3.5 w-3.5" /></button></div><div className="mt-2 flex items-center gap-2"><select value={line.direction} onClick={(event) => event.stopPropagation()} onChange={(event) => updateLine(line.id, { direction: event.target.value as VirtualCountingLine["direction"] })} aria-label={`Arah ${line.name}`} className="min-w-0 flex-1 rounded border border-white/10 bg-[#101719] px-2 py-1.5 text-[10px] text-stone-200"><option value="both">{directionLabel("both")}</option><option value="a_to_b">{directionLabel("a_to_b")}</option><option value="b_to_a">{directionLabel("b_to_a")}</option></select><button type="button" onClick={(event) => { event.stopPropagation(); updateLine(line.id, { enabled: !line.enabled }); }} className={`rounded px-2 py-1.5 text-[10px] font-semibold ${line.enabled ? "bg-lime-300/10 text-lime-200" : "bg-white/5 text-stone-500"}`}>{line.enabled ? "Aktif" : "Jeda"}</button></div><p className={`mt-2 text-[9px] font-semibold ${line.id === selectedLineId ? "text-lime-200" : "text-stone-600"}`}>{line.id === selectedLineId ? "Dipilih di overlay live" : "Klik untuk pilih pada panel atau overlay"}</p></div>)}
+          {config.virtualLines.length === 0 ? <p className="rounded-lg border border-dashed border-white/10 p-3 text-[10px] text-stone-500">Belum ada garis virtual. Garis ini nantinya digunakan worker inferensi sebagai batas counting kendaraan.</p> : config.virtualLines.map((line, index) => <div key={line.id} role="button" tabIndex={0} aria-pressed={line.id === selectedLineId} onClick={() => setSelectedLineId(line.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedLineId(line.id); }} className={`rounded-lg border p-2.5 transition-colors ${line.id === selectedLineId ? "border-lime-300/60 bg-lime-300/10" : "border-white/10 bg-black/15"}`}><div className="flex items-center gap-2"><input value={line.name} onClick={(event) => event.stopPropagation()} onChange={(event) => updateLine(line.id, { name: event.target.value.slice(0, 80) })} aria-label={`Nama garis ${index + 1}`} className="min-w-0 flex-1 bg-transparent text-[11px] font-semibold text-white outline-none" /><button type="button" onClick={(event) => { event.stopPropagation(); setSelectedLineId((current) => current === line.id ? null : current); setConfig((current) => ({ ...current, virtualLines: current.virtualLines.filter((item) => item.id !== line.id) })); }} aria-label={`Hapus ${line.name}`} className="text-stone-500 hover:text-red-300"><Trash2 className="h-3.5 w-3.5" /></button></div><div className="mt-2 flex items-center gap-2"><select value={line.direction} onClick={(event) => event.stopPropagation()} onChange={(event) => updateLine(line.id, { direction: event.target.value as VirtualCountingLine["direction"] })} aria-label={`Arah ${line.name}`} className="min-w-0 flex-1 rounded border border-white/10 bg-[#101719] px-2 py-1.5 text-[10px] text-stone-200"><option value="both">{directionLabel("both")}</option><option value="a_to_b">{directionLabel("a_to_b")}</option><option value="b_to_a">{directionLabel("b_to_a")}</option></select><button type="button" onClick={(event) => { event.stopPropagation(); updateLine(line.id, { enabled: !line.enabled }); }} className={`rounded px-2 py-1.5 text-[10px] font-semibold ${line.enabled ? "bg-lime-300/10 text-lime-200" : "bg-white/5 text-stone-500"}`}>{line.enabled ? "Aktif" : "Jeda"}</button></div><p className={`mt-2 text-[9px] font-semibold ${line.id === selectedLineId ? "text-lime-200" : "text-stone-600"}`}>{line.id === selectedLineId ? isEditingOverlay ? "Tarik titik ujung pada video untuk memindahkan garis" : "Dipilih di overlay live" : "Klik untuk pilih pada panel atau overlay"}</p></div>)}
         </div>
       </section>
 
