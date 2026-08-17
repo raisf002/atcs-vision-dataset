@@ -21,7 +21,7 @@ vi.mock("@/lib/trpc", () => ({
     },
   },
 }));
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 
 import CountingWorkspace from "./CountingWorkspace";
 
@@ -50,6 +50,12 @@ describe("CountingWorkspace", () => {
     render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay" isConsoleActive={false} onOpenConsole={onOpenConsole} />);
     fireEvent.click(screen.getByRole("button", { name: /Buka konsol kamera untuk edit di live video/ }));
     expect(onOpenConsole).toHaveBeenCalledTimes(1);
+  });
+
+  it("tidak mengaktifkan mode edit sebelum slot live video benar-benar tersedia", () => {
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="slot-belum-ada" isConsoleActive onOpenConsole={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /Edit garis langsung di live video/ }));
+    expect(screen.queryByLabelText(/Overlay editor garis virtual pada live video/)).toBeNull();
   });
 
   it("menyimpan garis virtual yang dibuat langsung pada overlay live video untuk kamera yang dipilih", async () => {
@@ -129,6 +135,7 @@ describe("CountingWorkspace", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     const [, options] = fetchMock.mock.calls[0] ?? [];
     expect(options).toEqual(expect.objectContaining({ headers: expect.objectContaining({ "x-model-scope": "camera", "x-model-camera-id": "cimulu" }) }));
+    expect(mocks.invalidate).toHaveBeenCalledWith({ cameraId: "cimulu" });
   });
 
   it("merender garis normal dengan ketebalan ringan agar video tetap terlihat", async () => {

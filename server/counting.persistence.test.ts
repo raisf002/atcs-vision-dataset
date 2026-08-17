@@ -18,6 +18,10 @@ function cameraIdFromCondition(condition: unknown) {
   return collectStringValues(condition).find((value) => stores.configs.has(value) || value === "cimulu" || value === "alpha");
 }
 
+function modelIdFromCondition(condition: unknown) {
+  return collectStringValues(condition).find((value) => stores.models.has(value));
+}
+
 vi.mock("./dataset", () => ({ ensureDatasetFoundation: vi.fn(async () => undefined) }));
 vi.mock("./db", () => ({
   getDb: vi.fn(async () => ({
@@ -25,6 +29,8 @@ vi.mock("./db", () => ({
       from: (table: any) => ({
         where: (condition: any) => ({
           limit: async () => {
+            const modelId = modelIdFromCondition(condition);
+            if (modelId) return [stores.models.get(modelId)];
             if (stores.models.size > 0 && stores.configs.size === 0) return Array.from(stores.models.values());
             const cameraId = cameraIdFromCondition(condition);
             return cameraId && stores.configs.has(cameraId) ? [stores.configs.get(cameraId)] : [];
@@ -52,6 +58,9 @@ describe("counting persistence integration", () => {
   beforeEach(() => { stores.configs.clear(); stores.models.clear(); });
 
   it("menyimpan lalu memuat ulang konfigurasi counting dua kamera secara independen", async () => {
+    const common = { framework: "yolo" as const, format: "pt" as const, fileName: "traffic.pt", storageKey: "vision-models/global/traffic.pt", storageUrl: "/manus-storage/vision-models/global/traffic.pt", sizeBytes: 12, labels: ["car"], status: "draft" as const, scope: "global" as const };
+    await registerVisionModel({ ...common, id: "model_a", name: "Global A" }, 7);
+    await registerVisionModel({ ...common, id: "model_b", name: "Global B", storageKey: "vision-models/global/traffic-b.pt" }, 7);
     await saveCameraCountingConfig({ cameraId: "cimulu", modelId: "model_a", isEnabled: true, confidenceThreshold: 35, virtualLines: [{ id: "in", name: "Masuk", start: { x: 0.1, y: 0.2 }, end: { x: 0.8, y: 0.2 }, direction: "a_to_b", enabled: true }], classFilter: ["car"] }, 7);
     await saveCameraCountingConfig({ cameraId: "alpha", modelId: "model_b", isEnabled: false, confidenceThreshold: 60, virtualLines: [{ id: "out", name: "Keluar", start: { x: 0.3, y: 0.7 }, end: { x: 0.9, y: 0.7 }, direction: "b_to_a", enabled: true }], classFilter: ["motorcycle"] }, 7);
 
@@ -72,5 +81,11 @@ describe("counting persistence integration", () => {
 
     await expect(listVisionModels("cimulu")).resolves.toEqual(expect.arrayContaining([expect.objectContaining({ id: "model_global" }), expect.objectContaining({ id: "model_cimulu" })]));
     await expect(listVisionModels("cimulu")).resolves.not.toEqual(expect.arrayContaining([expect.objectContaining({ id: "model_alpha" })]));
+  });
+
+  it("menolak penyimpanan konfigurasi ketika model khusus milik CCTV lain dipilih", async () => {
+    await registerVisionModel({ id: "model_alpha", name: "Alpha only", framework: "yolo", format: "pt", fileName: "alpha.pt", storageKey: "vision-models/alpha/alpha.pt", storageUrl: "/manus-storage/vision-models/alpha/alpha.pt", sizeBytes: 12, labels: ["car"], status: "draft", scope: "camera", cameraId: "alpha" }, 7);
+
+    await expect(saveCameraCountingConfig({ cameraId: "cimulu", modelId: "model_alpha", isEnabled: false, confidenceThreshold: 35, virtualLines: [], classFilter: ["car"] }, 7)).rejects.toThrow("CCTV asalnya");
   });
 });

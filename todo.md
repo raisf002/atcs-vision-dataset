@@ -156,3 +156,9 @@
 - [x] Menipiskan kembali garis virtual live agar tidak mengganggu visual CCTV.
 - [x] Menambahkan handle titik ujung yang dapat dipindahkan langsung pada overlay live video.
 - [x] Menambahkan regresi pemindahan titik garis dan penyimpanan geometri per kamera.
+- [x] Melakukan audit regresi, build, log runtime, dan alur editor interaktif untuk menemukan bug yang dapat direproduksi.
+- [x] Memperbaiki bug yang ditemukan dalam audit dan menambahkan regresinya.
+- [x] Memetakan klik dan drag overlay terhadap area video nyata agar garis tidak bergeser saat letterbox atau resize.
+- [x] Menjamin slot overlay siap sebelum mode edit aktif dan memperbarui query model khusus kamera setelah unggah.
+- [x] Memvalidasi di server bahwa model khusus kamera tidak dapat dipasang ke CCTV lain.
+- [x] Menambahkan regresi untuk letterbox overlay, kesiapan portal, invalidasi model, dan validasi cakupan model.

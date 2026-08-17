@@ -47,6 +47,12 @@ export async function saveCameraCountingConfig(input: CountingConfigInput, userI
   const db = await getDb();
   if (!db) throw new Error("Database tidak tersedia");
 
+  if (input.modelId) {
+    const [model] = await db.select().from(visionModels).where(eq(visionModels.id, input.modelId)).limit(1);
+    if (!model || model.status === "archived") throw new Error("Model visi yang dipilih tidak tersedia");
+    if (model.scope === "camera" && model.cameraId !== input.cameraId) throw new Error("Model khusus kamera hanya dapat dipakai pada CCTV asalnya");
+  }
+
   const values = {
     modelId: input.modelId,
     isEnabled: input.isEnabled,
