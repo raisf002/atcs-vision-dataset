@@ -102,3 +102,8 @@
 - [x] Menambahkan tampilan peta/overview kamera ATCS yang terhubung dengan registry dan pemilihan kamera.
 - [x] Menambahkan regresi UI untuk command center, pemilihan kamera, panel konfigurasi, dan state sumber gagal.
 - [x] Memvalidasi command center pada desktop dan mobile, menjalankan test/check/build, lalu menyimpan checkpoint.
+- [x] Memperkuat retry capture HLS untuk gangguan segmen sementara tanpa mengaktifkan jadwal produksi.
+- [x] Memperjelas klasifikasi serta pesan kegagalan sumber HLS agar kamera tidak dilabeli rusak permanen saat gangguan bersifat sementara.
+- [x] Menambahkan regresi worker dan status kamera untuk skenario kegagalan segmen HLS yang dapat dipulihkan.
+- [x] Menyelaraskan detail CCTV agar gangguan HLS sementara menggunakan tindakan muat ulang live view, bukan tindakan pipeline.
+- [x] Menambahkan regresi detail CCTV untuk label, penjelasan, dan tindakan pemulihan gangguan HLS sementara.

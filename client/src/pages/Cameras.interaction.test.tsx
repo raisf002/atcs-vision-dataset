@@ -82,6 +82,20 @@ describe("Camera registry interactions", () => {
     expect(screen.getByText("Pipeline worker gagal")).toBeTruthy();
   });
 
+  it("renders exhausted HLS segment retries as a temporary disruption", () => {
+    mocks.cameras = [{
+      ...mocks.cameras[0],
+      id: "hls-transient",
+      name: "HLS Transient",
+      lastCaptureStatus: "failed",
+      lastError: "HLS_TRANSIENT: segmen live tidak tersedia atau tidak valid setelah 4 percobaan.",
+    }];
+    render(<Cameras />);
+
+    expect(screen.getByText("Gangguan HLS sementara")).toBeTruthy();
+    expect(screen.getByText(/Worker akan mencoba ulang secara otomatis/)).toBeTruthy();
+  });
+
   it("filters the registry by capture health without hiding the source diagnosis", async () => {
     const user = userEvent.setup();
     mocks.cameras = [

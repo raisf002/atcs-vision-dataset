@@ -55,6 +55,16 @@ describe("Camera detail failure diagnostics", () => {
     expect(screen.getByRole("button", { name: "Muat ulang live view" })).toBeTruthy();
   });
 
+  it("treats exhausted HLS segment retries as a temporary source disruption", () => {
+    mocks.camera = { ...defaultCamera, lastError: "HLS_TRANSIENT: segmen live tidak tersedia atau tidak valid setelah 4 percobaan." };
+    render(<CameraDetail />);
+
+    expect(screen.getByText("Gangguan HLS sementara")).toBeTruthy();
+    expect(screen.getByText(/Tidak perlu mengubah URL saat gangguan bersifat sementara/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Muat ulang live view" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Tinjau registry" })).toBeNull();
+  });
+
   it("directs worker failures to the registry instead of presenting them as source failures", () => {
     mocks.camera = { ...defaultCamera, lastError: "worker timeout while uploading snapshot" };
     render(<CameraDetail />);

@@ -2,13 +2,14 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { spawn } from "node:child_process";
+import { buildHlsFrameArgs, formatCaptureFailure, hlsRetryDelayMs, isTransientHlsFailure } from "./hls.mjs";
 import { withRetry } from "./retry.mjs";
 
 const baseUrl = (process.env.CAPTURE_API_BASE ?? "").replace(/\/$/, "");
 const ingestToken = process.env.CAPTURE_WORKER_INGEST_TOKEN ?? "";
 const maxParallel = Math.max(1, Math.min(Number(process.env.WORKER_MAX_PARALLEL ?? 6), 12));
 const timeoutMs = Math.max(5_000, Number(process.env.WORKER_TIMEOUT_MS ?? 25_000));
-const maxAttempts = Math.max(1, Math.min(Number(process.env.WORKER_MAX_ATTEMPTS ?? 3), 3));
+const maxAttempts = Math.max(1, Math.min(Number(process.env.WORKER_MAX_ATTEMPTS ?? 4), 4));
 const statePath = resolve(process.env.WORKER_STATE_PATH ?? "./state/capture-state.json");
 
 if (!baseUrl || !ingestToken) throw new Error("CAPTURE_API_BASE dan CAPTURE_WORKER_INGEST_TOKEN wajib diatur");
@@ -32,7 +33,7 @@ function isDue(camera, state, now) {
 
 function captureFrame(sourceUrl) {
   return new Promise((resolveCapture, rejectCapture) => {
-    const process = spawn("ffmpeg", ["-hide_banner", "-loglevel", "error", "-rw_timeout", "15000000", "-i", sourceUrl, "-frames:v", "1", "-q:v", "2", "-f", "image2pipe", "-vcodec", "mjpeg", "pipe:1"], { stdio: ["ignore", "pipe", "pipe"] });
+    const process = spawn("ffmpeg", buildHlsFrameArgs(sourceUrl), { stdio: ["ignore", "pipe", "pipe"] });
     const output = [];
     const errors = [];
     const timeout = setTimeout(() => process.kill("SIGKILL"), timeoutMs);
@@ -72,15 +73,17 @@ async function captureCamera(camera, state) {
     const image = await withRetry(() => captureFrame(camera.sourceUrl), {
       attempts: maxAttempts,
       delayMs: 750,
-      onAttemptFailure: (error, attempt) => console.warn(`Capture ${camera.id} attempt ${attempt}/${maxAttempts} failed:`, error.message),
+      getDelayMs: (error, attempt) => isTransientHlsFailure(error) ? hlsRetryDelayMs(attempt) : 750 * attempt,
+      onAttemptFailure: (error, attempt, waitMs) => console.warn(`Capture ${camera.id} attempt ${attempt}/${maxAttempts} failed; retry in ${waitMs}ms:`, error.message),
     });
     const dimensions = jpegDimensions(image);
     await api("/api/worker/ingest", { method: "PUT", headers: { "content-type": "image/jpeg", "x-camera-id": camera.id, "x-captured-at": capturedAt.toISOString(), ...(dimensions.width ? { "x-capture-width": String(dimensions.width), "x-capture-height": String(dimensions.height) } : {}) }, body: image });
     state[camera.id] = capturedAt.toISOString();
     console.log(`Captured ${camera.id}`);
   } catch (error) {
-    console.error(`Capture ${camera.id} failed after ${maxAttempts} attempt(s):`, error.message);
-    await reportFailure(camera.id, error);
+    const message = formatCaptureFailure(error, maxAttempts);
+    console.error(`Capture ${camera.id} failed after ${maxAttempts} attempt(s):`, message);
+    await reportFailure(camera.id, new Error(message));
   }
 }
 
