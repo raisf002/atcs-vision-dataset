@@ -132,3 +132,15 @@
 - [x] Menambahkan regresi pergantian basemap yang memastikan marker kamera tetap interaktif.
 - [x] Membuka peta langsung pada bounds yang mencakup seluruh titik CCTV resmi di Tasikmalaya.
 - [x] Menambahkan regresi framing awal dan memastikan pergantian Earth/Jalan tidak mengubah zoom pengguna.
+- [x] Menambahkan model data konfigurasi counting per CCTV untuk garis virtual, arah, dan kelas kendaraan.
+- [x] Menambahkan registri model visi yang menyimpan metadata YOLO/model sejenis secara aman di S3 dan basis data.
+- [x] Membangun ruang kerja Command Center per kamera untuk menggambar, menyimpan, serta meninjau garis virtual tanpa mengaktifkan inferensi.
+- [x] Menambahkan pemilih model per kamera dan status kesiapan inferensi yang jelas.
+- [x] Menambahkan regresi konfigurasi counting, persistensi per kamera, serta registri model.
+- [x] Menambahkan state loading, kosong, dan error yang eksplisit pada ruang kerja counting serta daftar model.
+- [x] Menambahkan regresi server unggah model admin dari penyimpanan ke registri model yang dapat dibaca kembali.
+- [x] Menambahkan regresi persistensi konfigurasi dua kamera agar garis dan model tidak tertukar antar CCTV.
+- [x] Menambahkan regresi integrasi unggah model admin lalu pembacaan ulang melalui registri model.
+- [x] Menambahkan regresi integrasi simpan/muat konfigurasi counting dua kamera yang terpisah.
+- [x] Menambahkan regresi upload model admin dengan helper registri nyata dan penyimpanan database terkontrol yang dapat dibaca ulang.
+- [x] Menambahkan regresi counting dua kamera yang memetakan hasil berdasarkan cameraId query, bukan urutan panggilan.

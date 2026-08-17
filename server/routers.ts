@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { getCameraCountingConfig, listVisionModels, saveCameraCountingConfig } from "./counting";
 import { getCaptureSettings, getDailySnapshotCounts, getDatasetOverview, getSnapshotStatsByCamera, listCameras, listSnapshots, updateCameraConfig, updateCaptureSettings } from "./dataset";
 
 export const appRouter = router({
@@ -33,6 +34,8 @@ export const appRouter = router({
       const cameraRows = await listCameras();
       return getSnapshotStatsByCamera(cameraRows.map((camera) => camera.id));
     }),
+    visionModels: protectedProcedure.query(() => listVisionModels()),
+    countingConfig: protectedProcedure.input(z.object({ cameraId: z.string().min(1).max(96) })).query(({ input }) => getCameraCountingConfig(input.cameraId)),
     updateCamera: adminProcedure.input(z.object({
       id: z.string().min(1).max(96),
       sourceUrl: z.url().nullable().optional(),
@@ -45,6 +48,21 @@ export const appRouter = router({
       intervalMinutes: z.enum(["1", "5", "10", "15"]),
       isEnabled: z.boolean(),
     })).mutation(({ input }) => updateCaptureSettings(input)),
+    saveCountingConfig: adminProcedure.input(z.object({
+      cameraId: z.string().min(1).max(96),
+      modelId: z.string().min(1).max(64).nullable(),
+      isEnabled: z.boolean(),
+      confidenceThreshold: z.number().int().min(10).max(90),
+      virtualLines: z.array(z.object({
+        id: z.string().min(1).max(64),
+        name: z.string().min(1).max(80),
+        start: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) }),
+        end: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) }),
+        direction: z.enum(["both", "a_to_b", "b_to_a"]),
+        enabled: z.boolean(),
+      })).max(12),
+      classFilter: z.array(z.string().min(1).max(40)).min(1).max(16),
+    })).mutation(({ input, ctx }) => saveCameraCountingConfig(input, ctx.user.id)),
   }),
 });
 

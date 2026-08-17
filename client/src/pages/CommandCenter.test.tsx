@@ -37,6 +37,7 @@ vi.mock("@/lib/trpc", () => ({
 }));
 vi.mock("@/components/LiveHlsPlayer", () => ({ default: ({ cameraName }: { cameraName: string }) => <div data-testid="live-player">Live view {cameraName}</div> }));
 vi.mock("@/components/AtcsCoordinateMap", () => ({ default: ({ cameras, onSelect }: { cameras: Array<{ id: string; name: string }>; onSelect: (id: string) => void }) => <div data-testid="coordinate-map">{cameras.map((camera) => <button key={camera.id} aria-label={`Pilih ${camera.name}`} onClick={() => onSelect(camera.id)}>{camera.name}</button>)}</div> }));
+vi.mock("@/components/CountingWorkspace", () => ({ default: ({ camera }: { camera?: { name: string } }) => <div data-testid="counting-workspace">Counting untuk {camera?.name}</div> }));
 vi.mock("sonner", () => ({ toast: { info: vi.fn(), success: vi.fn() } }));
 vi.mock("wouter", () => ({ Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => <a href={href} {...props}>{children}</a> }));
 
@@ -58,18 +59,17 @@ describe("CommandCenter", () => {
     expect(screen.getByText("Sumber HLS gagal")).toBeTruthy();
   });
 
-  it("menjaga kontrol AI sebagai konfigurasi preview yang dapat ditoggle", async () => {
+  it("membuka ruang kerja counting per kamera dari konsol", async () => {
     const user = userEvent.setup();
     render(<CommandCenter />);
 
-    expect(screen.getByText("PREVIEW")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: /Konsol kamera/ }));
-    const aiToggle = screen.getByText(/AI deteksi:/).closest("button");
+    const aiToggle = screen.getByText(/Counting setup:/).closest("button");
     expect(aiToggle).toBeTruthy();
     await user.click(aiToggle!);
 
-    expect(screen.getByText(/AI deteksi: AKTIF \(preview\)/)).toBeTruthy();
-    expect(screen.getByText(/Inferensi produksi membutuhkan model, worker, dan persetujuan deployment/)).toBeTruthy();
+    expect(screen.getByText(/Counting setup: DIBUKA/)).toBeTruthy();
+    expect(screen.getByTestId("counting-workspace").textContent).toContain("Simpang Alpha");
   });
 
   it("labels failed captures as historical records rather than current live-source failures", () => {

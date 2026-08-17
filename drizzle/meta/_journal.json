@@ -29,6 +29,13 @@
       "when": 1786874399876,
       "tag": "0003_striped_dakota_north",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1786952826937,
+      "tag": "0004_clumsy_longshot",
+      "breakpoints": true
     }
   ]
 }

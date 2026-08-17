@@ -60,6 +60,36 @@ export const captureErrors = mysqlTable("captureErrors", {
   occurredAt: timestamp("occurredAt").defaultNow().notNull(),
 }, (table) => [index("capture_errors_camera_occurred_idx").on(table.cameraId, table.occurredAt)]);
 
+export const visionModels = mysqlTable("visionModels", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  name: varchar("name", { length: 160 }).notNull(),
+  framework: mysqlEnum("framework", ["yolo", "onnx", "tensorrt", "other"]).notNull(),
+  format: mysqlEnum("format", ["pt", "onnx", "engine", "tflite", "other"]).notNull(),
+  version: varchar("version", { length: 80 }),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  storageKey: varchar("storageKey", { length: 512 }).notNull().unique(),
+  storageUrl: varchar("storageUrl", { length: 512 }).notNull(),
+  sizeBytes: bigint("sizeBytes", { mode: "number" }).default(0).notNull(),
+  labelsJson: text("labelsJson").notNull(),
+  description: text("description"),
+  status: mysqlEnum("status", ["draft", "ready", "archived"]).default("draft").notNull(),
+  createdByUserId: int("createdByUserId").references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [index("vision_models_status_created_idx").on(table.status, table.createdAt)]);
+
+export const cameraCountingConfigs = mysqlTable("cameraCountingConfigs", {
+  cameraId: varchar("cameraId", { length: 96 }).primaryKey().references(() => cameras.id),
+  modelId: varchar("modelId", { length: 64 }).references(() => visionModels.id),
+  isEnabled: boolean("isEnabled").default(false).notNull(),
+  confidenceThreshold: int("confidenceThreshold").default(35).notNull(),
+  virtualLinesJson: text("virtualLinesJson").notNull(),
+  classFilterJson: text("classFilterJson").notNull(),
+  updatedByUserId: int("updatedByUserId").references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [index("camera_counting_model_idx").on(table.modelId)]);
+
 export const datasetExports = mysqlTable("datasetExports", {
   id: int("id").autoincrement().primaryKey(),
   requestedByUserId: int("requestedByUserId").notNull().references(() => users.id),
@@ -78,3 +108,5 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Camera = typeof cameras.$inferSelect;
 export type Snapshot = typeof snapshots.$inferSelect;
+export type VisionModel = typeof visionModels.$inferSelect;
+export type CameraCountingConfig = typeof cameraCountingConfigs.$inferSelect;

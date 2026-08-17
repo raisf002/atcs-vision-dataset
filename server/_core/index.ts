@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { registerWorkerIngestRoutes } from "../workerIngest";
 import { registerExportZipRoute } from "../exportZip";
+import { registerModelUploadRoutes } from "../modelUpload";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -38,6 +39,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerWorkerIngestRoutes(app);
   registerExportZipRoute(app);
+  registerModelUploadRoutes(app);
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   // tRPC API
