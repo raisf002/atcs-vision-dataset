@@ -113,3 +113,5 @@
 - [x] Menambahkan regresi agar Camera Registry membedakan riwayat capture gagal dari sumber yang sedang tersedia.
 - [x] Menyimpan sinyal keberhasilan live view terbaru per kamera agar Camera Registry dapat mengikuti status playback aktual.
 - [x] Menambahkan regresi perubahan status Camera Registry yang dipicu oleh sinyal live playback, bukan hanya konfigurasi statis.
+- [x] Mengganti istilah ringkasan sumber/pipeline gagal menjadi riwayat capture gagal yang tidak menyiratkan gangguan live saat ini.
+- [x] Menambahkan regresi label ringkasan agar konteks historis kegagalan capture tetap jelas.

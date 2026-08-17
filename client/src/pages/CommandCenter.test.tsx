@@ -70,4 +70,13 @@ describe("CommandCenter", () => {
     expect(screen.getByText(/AI deteksi: AKTIF \(preview\)/)).toBeTruthy();
     expect(screen.getByText(/Inferensi produksi membutuhkan model, worker, dan persetujuan deployment/)).toBeTruthy();
   });
+
+  it("labels failed captures as historical records rather than current live-source failures", () => {
+    render(<CommandCenter />);
+
+    expect(screen.getAllByText("Riwayat capture gagal").length).toBeGreaterThan(0);
+    expect(screen.getByText("bukan status live saat ini")).toBeTruthy();
+    expect(screen.getByText(/Indikator oranye mencatat hasil percobaan capture terakhir/)).toBeTruthy();
+    expect(screen.queryByText("Sumber/pipeline gagal")).toBeNull();
+  });
 });
