@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   invalidate: vi.fn(),
   config: { cameraId: "cimulu", modelId: "model_yolo", isEnabled: false, confidenceThreshold: 35, virtualLines: [] as Array<{ id: string; name: string; start: { x: number; y: number }; end: { x: number; y: number }; direction: "both"; enabled: boolean }>, classFilter: ["car", "truck", "bus", "motorcycle"] },
-  models: [{ id: "model_yolo", name: "YOLO Kendaraan", framework: "yolo", fileName: "traffic.pt", sizeBytes: 2048, status: "ready" }],
+  models: [{ id: "model_yolo", name: "YOLO Kendaraan", framework: "yolo", fileName: "traffic.pt", sizeBytes: 2048, status: "ready", scope: "global" as const, cameraId: null }],
   loading: false,
   error: null as Error | null,
 }));
@@ -31,6 +31,7 @@ describe("CountingWorkspace", () => {
     mocks.loading = false;
     mocks.error = null;
     mocks.config.virtualLines = [];
+    vi.restoreAllMocks();
   });
 
   it("menunjukkan state memuat dan error yang jelas sebelum konfigurasi tersedia", () => {
@@ -113,6 +114,32 @@ describe("CountingWorkspace", () => {
 
     expect(screen.getByRole("button", { name: "Pilih garis Arah keluar" }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByText("Dipilih di overlay live")).toBeTruthy();
+    portal.remove();
+  });
+
+  it("mengunggah model khusus kamera dengan metadata cakupan yang benar", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true, json: async () => ({ model: { id: "model_cimulu" } }) } as Response);
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay" isConsoleActive={false} onOpenConsole={vi.fn()} />);
+    fireEvent.change(screen.getByPlaceholderText(/YOLOv8 kendaraan/), { target: { value: "YOLO Cimulu" } });
+    fireEvent.change(screen.getByLabelText("Berkas model"), { target: { files: [new File(["weights"], "cimulu.onnx", { type: "application/octet-stream" })] } });
+    fireEvent.click(screen.getByRole("button", { name: /Khusus kamera/ }));
+    expect(screen.getByRole("button", { name: /Khusus kamera/ }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: /Unggah model khusus kamera/ }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const [, options] = fetchMock.mock.calls[0] ?? [];
+    expect(options).toEqual(expect.objectContaining({ headers: expect.objectContaining({ "x-model-scope": "camera", "x-model-camera-id": "cimulu" }) }));
+  });
+
+  it("merender garis normal dengan ketebalan ringan agar video tetap terlihat", async () => {
+    mocks.config.virtualLines = [{ id: "line_thin", name: "Tipis", start: { x: 0.1, y: 0.3 }, end: { x: 0.9, y: 0.7 }, direction: "both", enabled: true }];
+    const portal = document.createElement("div");
+    portal.id = "overlay-thin";
+    document.body.appendChild(portal);
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay-thin" isConsoleActive onOpenConsole={vi.fn()} />);
+
+    await waitFor(() => expect(portal.querySelector('line[stroke="#bef264"]')).toBeTruthy());
+    expect(portal.querySelector('line[stroke="#bef264"]')?.getAttribute("stroke-width")).toBe("4");
     portal.remove();
   });
 });

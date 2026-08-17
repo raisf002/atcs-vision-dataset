@@ -43,12 +43,16 @@ export function registerModelUploadRoutes(app: Express) {
       const frameworkHeader = header(request, "x-model-framework").toLowerCase();
       const framework = ALLOWED_FRAMEWORKS.has(frameworkHeader) ? frameworkHeader as "yolo" | "onnx" | "tensorrt" | "other" : "other";
       const format = inferModelFormat(fileName);
+      const scope = header(request, "x-model-scope").toLowerCase() === "camera" ? "camera" as const : "global" as const;
+      const cameraId = header(request, "x-model-camera-id").slice(0, 96) || null;
       if (!fileName || format === "other") return response.status(400).json({ error: "unsupported_model_format", allowed: Array.from(ALLOWED_EXTENSIONS) });
       if (!name) return response.status(400).json({ error: "model_name_required" });
+      if (scope === "camera" && !cameraId) return response.status(400).json({ error: "camera_id_required_for_camera_scope" });
 
       const id = `model_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
       const contentType = format === "onnx" ? "application/octet-stream" : "application/octet-stream";
-      const stored = await storagePut(`vision-models/${id}/${fileName}`, file, contentType);
+      const scopeKey = scope === "camera" ? `camera-${safeFileName(cameraId ?? "")}` : "global";
+      const stored = await storagePut(`vision-models/${scopeKey}/${id}/${fileName}`, file, contentType);
       const model = await registerVisionModel({
         id,
         name,
@@ -62,6 +66,8 @@ export function registerModelUploadRoutes(app: Express) {
         labels: parseModelLabels(header(request, "x-model-labels")),
         description: header(request, "x-model-description").slice(0, 2000) || null,
         status: "draft",
+        scope,
+        cameraId,
       }, user.id);
       return response.status(201).json({ model });
     } catch (error) {

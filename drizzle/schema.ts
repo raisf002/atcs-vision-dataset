@@ -73,10 +73,12 @@ export const visionModels = mysqlTable("visionModels", {
   labelsJson: text("labelsJson").notNull(),
   description: text("description"),
   status: mysqlEnum("status", ["draft", "ready", "archived"]).default("draft").notNull(),
+  scope: mysqlEnum("scope", ["global", "camera"]).default("global").notNull(),
+  cameraId: varchar("cameraId", { length: 96 }).references(() => cameras.id),
   createdByUserId: int("createdByUserId").references(() => users.id),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => [index("vision_models_status_created_idx").on(table.status, table.createdAt)]);
+}, (table) => [index("vision_models_status_created_idx").on(table.status, table.createdAt), index("vision_models_scope_camera_idx").on(table.scope, table.cameraId)]);
 
 export const cameraCountingConfigs = mysqlTable("cameraCountingConfigs", {
   cameraId: varchar("cameraId", { length: 96 }).primaryKey().references(() => cameras.id),

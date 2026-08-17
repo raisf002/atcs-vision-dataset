@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { cameraCountingConfigs, visionModels } from "../drizzle/schema";
 import { createDefaultCountingConfig, type VirtualCountingLine } from "../shared/counting";
 import { ensureDatasetFoundation } from "./dataset";
@@ -65,9 +65,15 @@ export async function saveCameraCountingConfig(input: CountingConfigInput, userI
   return getCameraCountingConfig(input.cameraId);
 }
 
-export async function listVisionModels() {
+export async function listVisionModels(cameraId?: string) {
   const db = await getDb();
   if (!db) return [];
+  if (cameraId) {
+    return db.select().from(visionModels).where(or(
+      eq(visionModels.scope, "global"),
+      and(eq(visionModels.scope, "camera"), eq(visionModels.cameraId, cameraId)),
+    )).orderBy(desc(visionModels.updatedAt));
+  }
   return db.select().from(visionModels).orderBy(desc(visionModels.updatedAt));
 }
 
@@ -84,11 +90,17 @@ export async function registerVisionModel(input: {
   labels: string[];
   description?: string | null;
   status: "draft" | "ready" | "archived";
+  scope?: "global" | "camera";
+  cameraId?: string | null;
 }, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database tidak tersedia");
+  const scope = input.scope ?? "global";
+  if (scope === "camera" && !input.cameraId) throw new Error("Model khusus kamera memerlukan cameraId");
   await db.insert(visionModels).values({
     ...input,
+    scope,
+    cameraId: scope === "camera" ? input.cameraId : null,
     labelsJson: JSON.stringify(input.labels),
     createdByUserId: userId,
   });

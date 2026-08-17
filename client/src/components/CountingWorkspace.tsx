@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 type CameraSelection = { id: string; name: string } | undefined;
 type ModelFramework = "yolo" | "onnx" | "tensorrt" | "other";
+type ModelScope = "global" | "camera";
 
 const CLASS_OPTIONS = ["car", "truck", "bus", "motorcycle"];
 
@@ -38,12 +39,13 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
   const utils = trpc.useUtils();
   const cameraId = camera?.id ?? "";
   const configQuery = trpc.dataset.countingConfig.useQuery({ cameraId }, { enabled: Boolean(cameraId) });
-  const modelsQuery = trpc.dataset.visionModels.useQuery();
+  const modelsQuery = trpc.dataset.visionModels.useQuery(cameraId ? { cameraId } : undefined);
   const [config, setConfig] = useState(() => createDefaultCountingConfig(cameraId));
   const [pendingPoint, setPendingPoint] = useState<NormalizedPoint | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState("");
   const [modelFramework, setModelFramework] = useState<ModelFramework>("yolo");
+  const [modelScope, setModelScope] = useState<ModelScope>("global");
   const [labels, setLabels] = useState("car, truck, bus, motorcycle");
   const [uploading, setUploading] = useState(false);
   const [isEditingOverlay, setIsEditingOverlay] = useState(false);
@@ -109,6 +111,8 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
           "x-model-name": modelName.trim(),
           "x-model-framework": modelFramework,
           "x-model-labels": JSON.stringify(labels.split(",").map((label) => label.trim()).filter(Boolean)),
+          "x-model-scope": modelScope,
+          ...(modelScope === "camera" ? { "x-model-camera-id": cameraId } : {}),
         },
         body: await file.arrayBuffer(),
       });
@@ -118,7 +122,7 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
       setConfig((current) => ({ ...current, modelId: payload.model.id }));
       setFile(null);
       setModelName("");
-      toast.success("Model disimpan sebagai draf di registry. Pilih lalu simpan konfigurasi kamera.");
+      toast.success(modelScope === "camera" ? `Model khusus ${camera?.name ?? "kamera"} disimpan sebagai draf.` : "Model global disimpan sebagai draf di registry.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unggah model gagal");
     } finally {
@@ -132,7 +136,7 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
     <div className={`absolute inset-0 ${isEditingOverlay ? "pointer-events-auto" : "pointer-events-none"}`}>
       <svg viewBox="0 0 1000 562" role="button" tabIndex={isEditingOverlay ? 0 : -1} aria-label="Overlay editor garis virtual pada live video" className={`h-full w-full ${isEditingOverlay ? "cursor-crosshair" : ""}`}>
         {isEditingOverlay ? <rect width="1000" height="562" fill="transparent" aria-label="Bidang tambah garis pada live video" onClick={handleCanvasClick} /> : null}
-        {config.virtualLines.map((line, index) => { const isSelected = line.id === selectedLineId; return <g key={line.id} opacity={line.enabled ? 1 : 0.35} role="button" aria-label={`Pilih garis ${line.name}`} aria-pressed={isSelected} onClick={(event) => { event.stopPropagation(); setSelectedLineId(line.id); }} className={isEditingOverlay ? "cursor-pointer" : ""}><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={isSelected ? "#ffffff" : index % 2 ? "#fb923c" : "#bef264"} strokeWidth={isSelected ? "13" : "7"} /><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={index % 2 ? "#fb923c" : "#bef264"} strokeWidth={isSelected ? "6" : "7"} /><circle cx={line.start.x * 1000} cy={line.start.y * 562} r={isSelected ? "12" : "9"} fill="#fff" /><circle cx={line.end.x * 1000} cy={line.end.y * 562} r={isSelected ? "12" : "9"} fill="#fff" /><text x={(line.start.x + line.end.x) * 500} y={(line.start.y + line.end.y) * 281 - 12} textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="700" paintOrder="stroke" stroke="#071012" strokeWidth="5">{line.name}</text></g>; })}
+        {config.virtualLines.map((line, index) => { const isSelected = line.id === selectedLineId; return <g key={line.id} opacity={line.enabled ? 1 : 0.42} role="button" aria-label={`Pilih garis ${line.name}`} aria-pressed={isSelected} onClick={(event) => { event.stopPropagation(); setSelectedLineId(line.id); }} className={isEditingOverlay ? "cursor-pointer" : ""}><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={isSelected ? "#ffffff" : index % 2 ? "#fb923c" : "#bef264"} strokeWidth={isSelected ? "7" : "4"} /><line x1={line.start.x * 1000} y1={line.start.y * 562} x2={line.end.x * 1000} y2={line.end.y * 562} stroke={index % 2 ? "#fb923c" : "#bef264"} strokeWidth={isSelected ? "3" : "4"} /><circle cx={line.start.x * 1000} cy={line.start.y * 562} r={isSelected ? "8" : "6"} fill="#fff" /><circle cx={line.end.x * 1000} cy={line.end.y * 562} r={isSelected ? "8" : "6"} fill="#fff" /><text x={(line.start.x + line.end.x) * 500} y={(line.start.y + line.end.y) * 281 - 10} textAnchor="middle" fill="#ffffff" fontSize="14" fontWeight="700" paintOrder="stroke" stroke="#071012" strokeWidth="3">{line.name}</text></g>; })}
         {isEditingOverlay ? <><rect x="24" y="24" width="250" height="42" rx="12" fill="#071012" fillOpacity="0.82" pointerEvents="none" /><text x="42" y="50" fill="#bef264" fontSize="18" fontWeight="700" pointerEvents="none">{pendingPoint ? "Pilih titik kedua" : "Klik titik pertama garis"}</text>{pendingPoint ? <circle cx={pendingPoint.x * 1000} cy={pendingPoint.y * 562} r="12" fill="#bef264" pointerEvents="none" /> : null}</> : null}
       </svg>
     </div>,
@@ -161,8 +165,8 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
       <section className="rounded-xl border border-white/10 bg-[#101719] p-4">
         <div className="flex items-center justify-between"><h2 className="text-xs font-bold text-white">Model & target klasifikasi</h2><span className="text-[9px] font-bold text-amber-200">INFERENSI STANDBY</span></div>
         <label className="mt-3 block text-[10px] font-semibold text-stone-400">Model untuk {camera.name}</label>
-        <select value={config.modelId ?? ""} onChange={(event) => setConfig((current) => ({ ...current, modelId: event.target.value || null }))} aria-label="Pilih model visi" className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/15 px-3 py-2 text-[11px] text-stone-200 outline-none"><option value="">Belum memilih model</option>{(modelsQuery.data ?? []).filter((model) => model.status !== "archived").map((model) => <option key={model.id} value={model.id}>{model.name} · {model.framework.toUpperCase()} · {model.status}</option>)}</select>
-        <p className="mt-1.5 text-[10px] text-stone-500">{selectedModel ? `${selectedModel.fileName} · ${(selectedModel.sizeBytes / 1024 / 1024).toFixed(1)} MB · ${selectedModel.status}` : (modelsQuery.data ?? []).length === 0 ? "Registry model masih kosong. Unggah model sebagai draf untuk mengaitkannya ke kamera ini." : "Pilih atau unggah model sebelum worker inferensi diaktifkan."}</p>
+        <select value={config.modelId ?? ""} onChange={(event) => setConfig((current) => ({ ...current, modelId: event.target.value || null }))} aria-label="Pilih model visi" className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/15 px-3 py-2 text-[11px] text-stone-200 outline-none"><option value="">Belum memilih model</option>{(modelsQuery.data ?? []).filter((model) => model.status !== "archived").map((model) => <option key={model.id} value={model.id}>{model.scope === "camera" ? "KHUSUS KAMERA" : "GLOBAL"} · {model.name} · {model.framework.toUpperCase()} · {model.status}</option>)}</select>
+        <p className="mt-1.5 text-[10px] text-stone-500">{selectedModel ? `${selectedModel.scope === "camera" ? "Khusus kamera ini" : "Model global"} · ${selectedModel.fileName} · ${(selectedModel.sizeBytes / 1024 / 1024).toFixed(1)} MB · ${selectedModel.status}` : (modelsQuery.data ?? []).length === 0 ? "Belum ada model global atau khusus kamera ini. Unggah model sebagai draf untuk mengaitkannya ke kamera ini." : "Pilih atau unggah model sebelum worker inferensi diaktifkan."}</p>
         <div className="mt-3 flex items-center justify-between"><label className="text-[10px] font-semibold text-stone-400">Ambang confidence</label><span className="font-mono text-xs text-lime-300">{config.confidenceThreshold}%</span></div><input aria-label="Ambang confidence counting" type="range" min="10" max="90" value={config.confidenceThreshold} onChange={(event) => setConfig((current) => ({ ...current, confidenceThreshold: Number(event.target.value) }))} className="mt-1 w-full accent-lime-300" />
         <div className="mt-3 grid grid-cols-2 gap-2">{CLASS_OPTIONS.map((className) => { const active = config.classFilter.includes(className); return <button key={className} type="button" onClick={() => setConfig((current) => ({ ...current, classFilter: active ? current.classFilter.filter((item) => item !== className) : [...current.classFilter, className] }))} className={`rounded-lg border px-2 py-2 text-[10px] font-semibold ${active ? "border-lime-300/30 bg-lime-300/10 text-lime-200" : "border-white/10 text-stone-500"}`}><Check className="mr-1 inline h-3 w-3" />{className}</button>; })}</div>
         <label className="mt-3 flex items-center gap-2 text-[10px] text-stone-400"><input type="checkbox" checked={config.isEnabled} onChange={(event) => setConfig((current) => ({ ...current, isEnabled: event.target.checked }))} className="accent-lime-300" />Konfigurasi counting siap digunakan worker</label>
@@ -170,11 +174,12 @@ export default function CountingWorkspace({ camera, overlayTargetId, isConsoleAc
       </section>
 
       <section className="rounded-xl border border-white/10 bg-[#101719] p-4">
-        <h2 className="text-xs font-bold text-white">Registri model visi</h2><p className="mt-1 text-[10px] text-stone-500">Bobot model disimpan ke S3 sebagai draf; memilih model belum menjalankan inferensi.</p>
+        <h2 className="text-xs font-bold text-white">Registri model visi</h2><p className="mt-1 text-[10px] text-stone-500">Bobot model disimpan ke S3 sebagai draf. Pilih apakah model berlaku untuk semua CCTV atau hanya {camera.name}; unggahan tidak menjalankan inferensi.</p>
         <label className="mt-3 block text-[10px] font-semibold text-stone-400">Nama model</label><input value={modelName} onChange={(event) => setModelName(event.target.value)} placeholder="contoh: YOLOv8 kendaraan v1" className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/15 px-3 py-2 text-[11px] text-white outline-none placeholder:text-stone-600" />
+        <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="Cakupan model yang diunggah"><button type="button" aria-pressed={modelScope === "global"} onClick={() => setModelScope("global")} className={`rounded-lg border px-2 py-2 text-left text-[10px] font-semibold ${modelScope === "global" ? "border-lime-300/50 bg-lime-300/10 text-lime-100" : "border-white/10 text-stone-500 hover:bg-white/5"}`}><span className="block">Global</span><span className="mt-0.5 block font-normal text-[9px] opacity-75">Tersedia untuk semua CCTV</span></button><button type="button" aria-pressed={modelScope === "camera"} onClick={() => setModelScope("camera")} className={`rounded-lg border px-2 py-2 text-left text-[10px] font-semibold ${modelScope === "camera" ? "border-orange-300/50 bg-orange-300/10 text-orange-100" : "border-white/10 text-stone-500 hover:bg-white/5"}`}><span className="block">Khusus kamera</span><span className="mt-0.5 block truncate font-normal text-[9px] opacity-75">{camera.name}</span></button></div>
         <div className="mt-2 grid grid-cols-2 gap-2"><select value={modelFramework} onChange={(event) => setModelFramework(event.target.value as ModelFramework)} aria-label="Framework model" className="rounded-lg border border-white/10 bg-black/15 px-2 py-2 text-[10px] text-stone-200"><option value="yolo">YOLO</option><option value="onnx">ONNX</option><option value="tensorrt">TensorRT</option><option value="other">Lainnya</option></select><input type="file" accept=".pt,.onnx,.engine,.tflite" onChange={(event) => setFile(event.target.files?.[0] ?? null)} aria-label="Berkas model" className="w-full text-[10px] text-stone-400 file:mr-2 file:rounded file:border-0 file:bg-white/10 file:px-2 file:py-1 file:text-[10px] file:text-white" /></div>
         <input value={labels} onChange={(event) => setLabels(event.target.value)} aria-label="Label kelas model" placeholder="car, truck, bus, motorcycle" className="mt-2 w-full rounded-lg border border-white/10 bg-black/15 px-3 py-2 text-[10px] text-white outline-none placeholder:text-stone-600" />
-        <Button type="button" variant="outline" onClick={uploadModel} disabled={uploading} className="mt-3 w-full border-white/10 text-stone-100 hover:bg-white/10"><Upload className="mr-2 h-3.5 w-3.5" />{uploading ? "Mengunggah…" : "Unggah model sebagai draf"}</Button>
+        <Button type="button" variant="outline" onClick={uploadModel} disabled={uploading} className="mt-3 w-full border-white/10 text-stone-100 hover:bg-white/10"><Upload className="mr-2 h-3.5 w-3.5" />{uploading ? "Mengunggah…" : modelScope === "camera" ? "Unggah model khusus kamera" : "Unggah model global"}</Button>
       </section>
     </div>
   </>;

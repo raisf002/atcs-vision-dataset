@@ -34,7 +34,7 @@ export const appRouter = router({
       const cameraRows = await listCameras();
       return getSnapshotStatsByCamera(cameraRows.map((camera) => camera.id));
     }),
-    visionModels: protectedProcedure.query(() => listVisionModels()),
+    visionModels: protectedProcedure.input(z.object({ cameraId: z.string().min(1).max(96) }).optional()).query(({ input }) => listVisionModels(input?.cameraId)),
     countingConfig: protectedProcedure.input(z.object({ cameraId: z.string().min(1).max(96) })).query(({ input }) => getCameraCountingConfig(input.cameraId)),
     updateCamera: adminProcedure.input(z.object({
       id: z.string().min(1).max(96),

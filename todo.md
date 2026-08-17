@@ -149,3 +149,7 @@
 - [x] Menambahkan regresi overlay video untuk pembuatan garis, pemilihan garis, dan pemuatan ulang konfigurasi kamera.
 - [x] Menambahkan pemilihan garis aktif di atas live video serta menyorot garis yang dipilih.
 - [x] Menambahkan regresi pemilihan garis overlay dan sinkronisasinya dengan panel detail garis.
+- [x] Menipiskan garis virtual di atas live video sambil mempertahankan kontras warna dan indikator garis terpilih.
+- [x] Menambahkan cakupan registry model: global untuk semua CCTV atau khusus untuk satu kamera.
+- [x] Menambahkan kontrol upload dan pemilih model yang menyaring model global serta model kamera aktif.
+- [x] Menambahkan regresi cakupan model dan penampilan garis overlay yang diperbarui.
