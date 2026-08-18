@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   models: [{ id: "model_yolo", name: "YOLO Kendaraan", framework: "yolo", fileName: "traffic.pt", sizeBytes: 2048, status: "ready", scope: "global" as const, cameraId: null }],
   loading: false,
   error: null as Error | null,
+  user: { role: "admin", name: "Admin" } as { role: string; name: string } | null,
 }));
 
 vi.mock("@/lib/trpc", () => ({
@@ -22,6 +23,7 @@ vi.mock("@/lib/trpc", () => ({
   },
 }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }));
+vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ user: mocks.user }) }));
 
 import CountingWorkspace from "./CountingWorkspace";
 
@@ -31,6 +33,7 @@ describe("CountingWorkspace", () => {
     mocks.loading = false;
     mocks.error = null;
     mocks.config.virtualLines = [];
+    mocks.user = { role: "admin", name: "Admin" };
     vi.restoreAllMocks();
   });
 
@@ -50,6 +53,14 @@ describe("CountingWorkspace", () => {
     render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay" isConsoleActive={false} onOpenConsole={onOpenConsole} />);
     fireEvent.click(screen.getByRole("button", { name: /Buka konsol kamera untuk edit di live video/ }));
     expect(onOpenConsole).toHaveBeenCalledTimes(1);
+  });
+
+  it("menampilkan konfigurasi hanya-baca dan menyembunyikan editor ketika menjadi Guest", () => {
+    mocks.user = null;
+    render(<CountingWorkspace camera={{ id: "cimulu", name: "Simpang Cimulu" }} overlayTargetId="overlay" isConsoleActive onOpenConsole={vi.fn()} />);
+    expect(screen.getByText(/Mode Guest tidak dapat menggambar/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Edit garis langsung di live video/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Simpan konfigurasi kamera/ })).toBeNull();
   });
 
   it("tidak mengaktifkan mode edit sebelum slot live video benar-benar tersedia", () => {

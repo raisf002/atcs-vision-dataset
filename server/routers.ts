@@ -20,22 +20,22 @@ export const appRouter = router({
     }),
   }),
   dataset: router({
-    overview: protectedProcedure.query(() => getDatasetOverview()),
-    cameras: protectedProcedure.query(() => listCameras()),
-    captureSettings: protectedProcedure.query(() => getCaptureSettings()),
+    overview: publicProcedure.query(() => getDatasetOverview()),
+    cameras: publicProcedure.query(() => listCameras()),
+    captureSettings: publicProcedure.query(() => getCaptureSettings()),
     snapshots: protectedProcedure.input(z.object({
       cameraId: z.string().min(1).optional(),
       from: z.date().optional(),
       to: z.date().optional(),
       limit: z.number().int().min(1).max(120).default(60),
     })).query(({ input }) => listSnapshots(input)),
-    dailyStats: protectedProcedure.input(z.object({ days: z.number().int().min(1).max(31).default(7) })).query(({ input }) => getDailySnapshotCounts(input.days)),
-    cameraStats: protectedProcedure.query(async () => {
+    dailyStats: publicProcedure.input(z.object({ days: z.number().int().min(1).max(31).default(7) })).query(({ input }) => getDailySnapshotCounts(input.days)),
+    cameraStats: publicProcedure.query(async () => {
       const cameraRows = await listCameras();
       return getSnapshotStatsByCamera(cameraRows.map((camera) => camera.id));
     }),
-    visionModels: protectedProcedure.input(z.object({ cameraId: z.string().min(1).max(96) }).optional()).query(({ input }) => listVisionModels(input?.cameraId)),
-    countingConfig: protectedProcedure.input(z.object({ cameraId: z.string().min(1).max(96) })).query(({ input }) => getCameraCountingConfig(input.cameraId)),
+    visionModels: publicProcedure.input(z.object({ cameraId: z.string().min(1).max(96) }).optional()).query(({ input }) => listVisionModels(input?.cameraId)),
+    countingConfig: publicProcedure.input(z.object({ cameraId: z.string().min(1).max(96) })).query(({ input }) => getCameraCountingConfig(input.cameraId)),
     updateCamera: adminProcedure.input(z.object({
       id: z.string().min(1).max(96),
       sourceUrl: z.url().nullable().optional(),

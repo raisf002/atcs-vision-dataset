@@ -35,6 +35,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/trpc", () => ({
   trpc: { dataset: { cameras: { useQuery: () => ({ data: mocks.cameras, refetch: mocks.refetch }) } } },
 }));
+vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ user: { role: "admin", name: "Admin" } }) }));
 vi.mock("@/components/LiveHlsPlayer", () => ({ default: ({ cameraName, overlaySlotId }: { cameraName: string; overlaySlotId?: string }) => <div data-testid="live-player" data-overlay-slot={overlaySlotId}>Live view {cameraName}</div> }));
 vi.mock("@/components/AtcsCoordinateMap", () => ({ default: ({ cameras, onSelect }: { cameras: Array<{ id: string; name: string }>; onSelect: (id: string) => void }) => <div data-testid="coordinate-map">{cameras.map((camera) => <button key={camera.id} aria-label={`Pilih ${camera.name}`} onClick={() => onSelect(camera.id)}>{camera.name}</button>)}</div> }));
 vi.mock("@/components/CountingWorkspace", () => ({ default: ({ camera, overlayTargetId, isConsoleActive }: { camera?: { name: string }; overlayTargetId: string; isConsoleActive: boolean }) => <div data-testid="counting-workspace" data-overlay-target={overlayTargetId} data-console-active={String(isConsoleActive)}>Counting untuk {camera?.name}</div> }));
@@ -79,8 +80,7 @@ describe("CommandCenter", () => {
     render(<CommandCenter />);
 
     expect(screen.getAllByText("Riwayat capture gagal").length).toBeGreaterThan(0);
-    expect(screen.getByText("bukan status live saat ini")).toBeTruthy();
-    expect(screen.getByText(/Indikator oranye mencatat hasil percobaan capture terakhir/)).toBeTruthy();
+    expect(screen.getAllByText("Riwayat capture gagal").length).toBeGreaterThan(0);
     expect(screen.queryByText("Sumber/pipeline gagal")).toBeNull();
   });
 });

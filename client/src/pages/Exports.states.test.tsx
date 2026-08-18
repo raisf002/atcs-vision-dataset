@@ -15,6 +15,7 @@ vi.mock("@/lib/trpc", () => ({
     },
   },
 }));
+vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ user: { role: "admin", name: "Admin" } }) }));
 
 import Exports from "./Exports";
 

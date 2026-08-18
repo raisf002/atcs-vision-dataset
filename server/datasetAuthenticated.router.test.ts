@@ -36,6 +36,10 @@ function makeAdminCaller() {
   });
 }
 
+function makeGuestCaller() {
+  return appRouter.createCaller({ user: null, req: {} as TrpcContext["req"], res: {} as TrpcContext["res"] });
+}
+
 describe("dataset router authenticated workflows", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -79,5 +83,12 @@ describe("dataset router authenticated workflows", () => {
       captureIntervalMinutes: "10",
       sourceStatus: "verified",
     });
+  });
+
+  it("membuka data baca untuk Guest tetapi tetap menolak mutasi konfigurasi", async () => {
+    const caller = makeGuestCaller();
+    await expect(caller.dataset.overview()).resolves.toEqual({ totals: { snapshots: 4 } });
+    await expect(caller.dataset.cameras()).resolves.toEqual([{ id: "cimulu", sortOrder: 1 }]);
+    await expect(caller.dataset.updateCamera({ id: "cimulu", isActive: true })).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

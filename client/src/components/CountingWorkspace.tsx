@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { DEFAULT_CLASS_FILTER, createDefaultCountingConfig, type NormalizedPoint, type VirtualCountingLine } from "@shared/counting";
 import { Check, Loader2, MousePointer2, Save, Trash2, Upload, Waypoints } from "lucide-react";
@@ -39,6 +40,8 @@ function directionLabel(direction: VirtualCountingLine["direction"]) {
 
 export default function CountingWorkspace({ camera, overlayTargetId, overlayElement, isConsoleActive, onOpenConsole }: { camera: CameraSelection; overlayTargetId: string; overlayElement?: HTMLElement | null; isConsoleActive: boolean; onOpenConsole: () => void }) {
   const utils = trpc.useUtils();
+  const { user } = useAuth();
+  const isGuest = !user;
   const cameraId = camera?.id ?? "";
   const configQuery = trpc.dataset.countingConfig.useQuery({ cameraId }, { enabled: Boolean(cameraId) });
   const modelsQuery = trpc.dataset.visionModels.useQuery(cameraId ? { cameraId } : undefined);
@@ -92,12 +95,16 @@ export default function CountingWorkspace({ camera, overlayTargetId, overlayElem
 
   const selectedModel = useMemo(() => (modelsQuery.data ?? []).find((model) => model.id === config.modelId), [config.modelId, modelsQuery.data]);
 
-  const updateLine = (id: string, patch: Partial<VirtualCountingLine>) => setConfig((current) => ({
+  const updateLine = (id: string, patch: Partial<VirtualCountingLine>) => {
+    if (isGuest) return;
+    setConfig((current) => ({
     ...current,
     virtualLines: current.virtualLines.map((line) => line.id === id ? { ...line, ...patch } : line),
-  }));
+    }));
+  };
 
   const handleCanvasClick = (event: React.MouseEvent<SVGSVGElement | SVGRectElement>) => {
+    if (isGuest) return;
     const point = pointFromElement(event);
     if (!pendingPoint) {
       setPendingPoint(point);
@@ -110,6 +117,7 @@ export default function CountingWorkspace({ camera, overlayTargetId, overlayElem
   };
 
   const startEndpointDrag = (event: React.PointerEvent<SVGCircleElement>, lineId: string, endpoint: "start" | "end") => {
+    if (isGuest) return;
     event.stopPropagation();
     if (typeof event.currentTarget.setPointerCapture === "function") event.currentTarget.setPointerCapture(event.pointerId);
     setSelectedLineId(lineId);
@@ -125,11 +133,13 @@ export default function CountingWorkspace({ camera, overlayTargetId, overlayElem
   const finishEndpointDrag = () => setDraggingEndpoint(null);
 
   const save = () => {
+    if (isGuest) return toast.info("Mode Guest hanya dapat melihat konfigurasi counting. Masuk sebagai admin untuk menyimpan perubahan.");
     if (!cameraId) return;
     saveConfig.mutate({ ...config, cameraId });
   };
 
   const uploadModel = async () => {
+    if (isGuest) return toast.info("Mode Guest tidak dapat mengunggah model. Masuk sebagai admin untuk melanjutkan.");
     if (!file) return toast.error("Pilih berkas model .pt, .onnx, .engine, atau .tflite terlebih dahulu.");
     if (!modelName.trim()) return toast.error("Masukkan nama model terlebih dahulu.");
     if (file.size > 50 * 1024 * 1024) return toast.error("Ukuran unggah dari Command Center dibatasi 50 MB. Gunakan handoff VPS untuk bobot yang lebih besar.");
@@ -165,7 +175,7 @@ export default function CountingWorkspace({ camera, overlayTargetId, overlayElem
 
   if (!camera) return null;
 
-  const lineOverlay = isConsoleActive && overlayTarget ? createPortal(
+  const lineOverlay = !isGuest && isConsoleActive && overlayTarget ? createPortal(
     <div className={`absolute inset-0 ${isEditingOverlay ? "pointer-events-auto" : "pointer-events-none"}`}>
       <svg viewBox="0 0 1000 562" role="button" tabIndex={isEditingOverlay ? 0 : -1} aria-label="Overlay editor garis virtual pada live video" onPointerMove={moveEndpoint} onPointerUp={finishEndpointDrag} onPointerCancel={finishEndpointDrag} className={`h-full w-full ${isEditingOverlay && !draggingEndpoint ? "cursor-crosshair" : ""}`}>
         {isEditingOverlay ? <rect width="1000" height="562" fill="transparent" aria-label="Bidang tambah garis pada live video" onClick={handleCanvasClick} /> : null}
@@ -182,6 +192,10 @@ export default function CountingWorkspace({ camera, overlayTargetId, overlayElem
 
   if (configQuery.error || modelsQuery.error) {
     return <section className="rounded-xl border border-orange-300/25 bg-orange-300/5 p-4" role="alert"><p className="text-xs font-semibold text-orange-200">Konfigurasi counting belum dapat dimuat.</p><p className="mt-1 text-[10px] text-stone-400">Periksa koneksi atau coba muat ulang data sebelum mengubah garis virtual dan model.</p><Button type="button" variant="outline" onClick={() => { configQuery.refetch(); modelsQuery.refetch(); }} className="mt-3 border-orange-300/30 text-orange-100 hover:bg-orange-300/10">Coba muat ulang</Button></section>;
+  }
+
+  if (isGuest) {
+    return <div className="space-y-3"><section className="rounded-xl border border-sky-300/25 bg-sky-300/5 p-4"><div className="flex items-center justify-between gap-3"><div><h2 className="flex items-center gap-2 text-xs font-bold text-white"><Waypoints className="h-3.5 w-3.5 text-sky-200" />Counting per kamera</h2><p className="mt-1 text-[10px] text-stone-400">{camera.name} · konfigurasi hanya-baca</p></div><span className="rounded bg-sky-300/10 px-2 py-1 text-[9px] font-bold text-sky-100">GUEST</span></div><p className="mt-3 text-[10px] leading-5 text-stone-300">Garis, pilihan model, dan kelas ditampilkan sebagai referensi. Mode Guest tidak dapat menggambar, menggeser, menyimpan, atau mengunggah model.</p><div className="mt-3 space-y-2">{config.virtualLines.length ? config.virtualLines.map((line) => <div key={line.id} className="rounded-lg border border-white/10 bg-black/15 p-2.5"><p className="text-[11px] font-semibold text-white">{line.name}</p><p className="mt-1 text-[10px] text-stone-500">{directionLabel(line.direction)} · {line.enabled ? "Aktif" : "Jeda"}</p></div>) : <p className="rounded-lg border border-dashed border-white/10 p-3 text-[10px] text-stone-500">Belum ada garis virtual tersimpan untuk kamera ini.</p>}</div></section><section className="rounded-xl border border-white/10 bg-[#101719] p-4"><h2 className="text-xs font-bold text-white">Model & target klasifikasi</h2><p className="mt-2 text-[10px] text-stone-400">{selectedModel ? `${selectedModel.scope === "camera" ? "Model khusus kamera" : "Model global"} · ${selectedModel.name} · ${selectedModel.framework.toUpperCase()}` : "Belum ada model yang dipilih untuk kamera ini."}</p><p className="mt-2 text-[10px] text-stone-500">Kelas: {config.classFilter.join(", ")} · Confidence {config.confidenceThreshold}%</p></section></div>;
   }
 
   return <>

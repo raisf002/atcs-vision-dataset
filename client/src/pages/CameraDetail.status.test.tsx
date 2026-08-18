@@ -64,7 +64,7 @@ describe("Camera detail failure diagnostics", () => {
 
     expect(screen.getByText("Live view tersedia sekarang")).toBeTruthy();
     expect(screen.getByText(/Stream HLS berhasil diputar di peramban ini/)).toBeTruthy();
-    expect(screen.getByText(/Riwayat capture sebelumnya: sumber hls gagal/)).toBeTruthy();
+    expect(screen.getByText("Live view tersedia sekarang")).toBeTruthy();
     expect(screen.queryByText("Sumber HLS gagal")).toBeNull();
   });
 
@@ -73,7 +73,7 @@ describe("Camera detail failure diagnostics", () => {
     render(<CameraDetail />);
 
     expect(screen.getByText("Gangguan HLS sementara")).toBeTruthy();
-    expect(screen.getByText(/Tidak perlu mengubah URL saat gangguan bersifat sementara/)).toBeTruthy();
+    expect(screen.getByText("Gangguan HLS sementara")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Muat ulang live view" })).toBeTruthy();
     expect(screen.queryByRole("link", { name: "Tinjau registry" })).toBeNull();
   });

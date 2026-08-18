@@ -165,3 +165,6 @@
 - [x] Mendiagnosis kegagalan pemutaran live CCTV pada Command Center dan detail kamera.
 - [x] Memperbaiki kegagalan HLS atau fallback pemutar yang dapat direproduksi tanpa mengaktifkan capture otomatis.
 - [x] Menambahkan regresi pemutaran live dan status error yang dapat ditindaklanjuti.
+- [x] Menyediakan mode Guest publik untuk melihat dashboard, registry, Command Center, dan live CCTV tanpa login.
+- [x] Menampilkan identitas Guest serta mengunci aksi menggambar, menyimpan, unggah model, pengaturan, ekspor, dan capture.
+- [x] Memastikan server tetap menolak seluruh mutasi tanpa autentikasi dan menambahkan regresi Guest.
