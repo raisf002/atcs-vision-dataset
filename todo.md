@@ -162,3 +162,6 @@
 - [x] Menjamin slot overlay siap sebelum mode edit aktif dan memperbarui query model khusus kamera setelah unggah.
 - [x] Memvalidasi di server bahwa model khusus kamera tidak dapat dipasang ke CCTV lain.
 - [x] Menambahkan regresi untuk letterbox overlay, kesiapan portal, invalidasi model, dan validasi cakupan model.
+- [x] Mendiagnosis kegagalan pemutaran live CCTV pada Command Center dan detail kamera.
+- [x] Memperbaiki kegagalan HLS atau fallback pemutar yang dapat direproduksi tanpa mengaktifkan capture otomatis.
+- [x] Menambahkan regresi pemutaran live dan status error yang dapat ditindaklanjuti.
