@@ -168,3 +168,6 @@
 - [x] Menyediakan mode Guest publik untuk melihat dashboard, registry, Command Center, dan live CCTV tanpa login.
 - [x] Menampilkan identitas Guest serta mengunci aksi menggambar, menyimpan, unggah model, pengaturan, ekspor, dan capture.
 - [x] Memastikan server tetap menolak seluruh mutasi tanpa autentikasi dan menambahkan regresi Guest.
+- [x] Menjalankan satu batch uji capture manual untuk seluruh 29 CCTV tanpa mengaktifkan jadwal otomatis.
+- [x] Memeriksa hasil ingest, snapshot, dan kegagalan per kamera dari batch uji.
+- [x] Memperbaiki kegagalan lokal yang dapat direproduksi atau mendokumentasikan gangguan sumber eksternal.
