@@ -89,6 +89,7 @@ describe("dataset router authenticated workflows", () => {
     const caller = makeGuestCaller();
     await expect(caller.dataset.overview()).resolves.toEqual({ totals: { snapshots: 4 } });
     await expect(caller.dataset.cameras()).resolves.toEqual([{ id: "cimulu", sortOrder: 1 }]);
+    await expect(caller.dataset.snapshots({ cameraId: "cimulu", limit: 24 })).resolves.toEqual([{ id: 1, cameraId: "cimulu" }]);
     await expect(caller.dataset.updateCamera({ id: "cimulu", isActive: true })).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

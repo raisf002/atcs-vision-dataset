@@ -23,7 +23,7 @@ export const appRouter = router({
     overview: publicProcedure.query(() => getDatasetOverview()),
     cameras: publicProcedure.query(() => listCameras()),
     captureSettings: publicProcedure.query(() => getCaptureSettings()),
-    snapshots: protectedProcedure.input(z.object({
+    snapshots: publicProcedure.input(z.object({
       cameraId: z.string().min(1).optional(),
       from: z.date().optional(),
       to: z.date().optional(),

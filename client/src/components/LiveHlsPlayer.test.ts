@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getLiveStreamErrorMessage, getObjectContainBox } from "./LiveHlsPlayer";
+import { CONNECTING_TIMEOUT_MS, getConnectingTimeoutMessage, getLiveStreamErrorMessage, getObjectContainBox } from "./LiveHlsPlayer";
 
 describe("getObjectContainBox", () => {
   it("menempatkan overlay pada area video nyata ketika stream diberi letterbox", () => {
@@ -13,5 +13,10 @@ describe("getObjectContainBox", () => {
   it("memberikan pesan tindakan yang jelas ketika sumber HLS gagal dijangkau", () => {
     expect(getLiveStreamErrorMessage("https://atcs.tasikmalayakota.go.id/camera/jati.m3u8")).toContain("Coba sambungkan ulang");
     expect(getLiveStreamErrorMessage(null)).toContain("belum dikonfigurasi");
+  });
+
+  it("menetapkan batas waktu CONNECTING dan pesan pemulihan yang dapat ditindaklanjuti", () => {
+    expect(CONNECTING_TIMEOUT_MS).toBe(15_000);
+    expect(getConnectingTimeoutMessage()).toContain("Coba sambungkan ulang");
   });
 });

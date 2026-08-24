@@ -171,3 +171,11 @@
 - [x] Menjalankan satu batch uji capture manual untuk seluruh 29 CCTV tanpa mengaktifkan jadwal otomatis.
 - [x] Memeriksa hasil ingest, snapshot, dan kegagalan per kamera dari batch uji.
 - [x] Memperbaiki kegagalan lokal yang dapat direproduksi atau mendokumentasikan gangguan sumber eksternal.
+- [x] Memperbaiki rute tak dikenal agar tidak menghasilkan halaman 404 mentah dari URL evaluasi yang terenkode.
+- [x] Menguji alur utama dashboard, registry, detail, gallery, exports, dan Command Center dengan bukti hasil.
+- [x] Mengaudit dan memperbaiki temuan UI/UX, performa, aksesibilitas, robustness HLS, serta keamanan yang dapat direproduksi.
+- [ ] Memvalidasi kontrak data, kesiapan training, dokumentasi operasi, dan membuat laporan evaluasi berskor.
+- [x] Menambahkan timeout CONNECTING HLS agar status berubah menjadi error yang dapat ditindaklanjuti ketika stream tidak mulai memutar.
+- [x] Menambahkan status aksesibel untuk bahasa halaman, navigasi aktif, dan pilihan interval capture.
+- [x] Menjalankan seluruh evaluasi dalam mode baca dan uji non-destruktif tanpa mengubah konfigurasi kamera atau data snapshot.
+- [x] Menyelaraskan endpoint gallery snapshot dengan kontrak mode Guest baca-publik tanpa membuka mutasi data.

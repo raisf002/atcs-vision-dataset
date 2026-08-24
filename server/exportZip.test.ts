@@ -1,5 +1,9 @@
 import express from "express";
+import { execFileSync } from "node:child_process";
+import { rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { registerExportZipRoute } from "./exportZip";
 import { sdk } from "./_core/sdk";
@@ -31,6 +35,14 @@ describe("dataset ZIP export", () => {
     expect(response.headers.get("content-type")).toContain("application/zip");
     const bytes = new Uint8Array(await response.arrayBuffer());
     expect([...bytes.slice(0, 4)]).toEqual([0x50, 0x4b, 0x03, 0x04]);
+
+    const archivePath = join(tmpdir(), `atcs-export-${Date.now()}.zip`);
+    await writeFile(archivePath, bytes);
+    try {
+      execFileSync("unzip", ["-t", archivePath], { stdio: "pipe" });
+    } finally {
+      await rm(archivePath, { force: true });
+    }
   }, 20_000);
 
   it("rejects a non-admin user before resolving export snapshots", async () => {

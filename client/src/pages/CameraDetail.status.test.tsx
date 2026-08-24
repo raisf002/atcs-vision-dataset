@@ -93,4 +93,12 @@ describe("Camera detail failure diagnostics", () => {
     expect(screen.queryByText("Sumber HLS gagal")).toBeNull();
     expect(screen.queryByText("Pipeline worker gagal")).toBeNull();
   });
+
+  it("menyatakan pilihan interval dan status toggle capture kepada teknologi bantu", () => {
+    render(<CameraDetail />);
+
+    expect(screen.getByRole("button", { name: "5min" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "15min" }).getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByRole("button", { name: "Aktifkan capture untuk kamera ini" }).getAttribute("aria-pressed")).toBe("true");
+  });
 });

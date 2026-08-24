@@ -8,7 +8,7 @@ import DatasetGallery from "@/pages/DatasetGallery";
 import Exports from "@/pages/Exports";
 import NotFound from "@/pages/NotFound";
 import Settings from "@/pages/Settings";
-import { Route, Switch } from "wouter";
+import { Redirect, Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -25,7 +25,9 @@ function Router() {
         <Route path={"/exports"} component={Exports} />
         <Route path={"/settings"} component={Settings} />
         <Route path={"/404"} component={NotFound} />
-        <Route component={NotFound} />
+        <Route>
+          <Redirect to="/" replace />
+        </Route>
       </Switch>
     </DashboardLayout>
   );

@@ -18,6 +18,12 @@ export function getLiveStreamErrorMessage(sourceUrl: string | null) {
   return sourceUrl ? "Sumber HLS belum merespons dari jaringan ini. Coba sambungkan ulang; bila tetap gagal, kemungkinan sumber publik ATCS sedang tidak dapat dijangkau." : "URL stream belum dikonfigurasi untuk kamera ini.";
 }
 
+export const CONNECTING_TIMEOUT_MS = 15_000;
+
+export function getConnectingTimeoutMessage() {
+  return "Stream belum mulai memutar. Coba sambungkan ulang; bila tetap gagal, periksa status sumber HLS kamera ini.";
+}
+
 type LiveHlsPlayerProps = {
   sourceUrl: string | null;
   cameraName: string;
@@ -89,8 +95,18 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
     setStatus("loading");
     setMessage("Menyiapkan stream live…");
     let hls: Hls | undefined;
-    const handlePlaying = () => setStatus("playing");
+    const connectingTimeout = window.setTimeout(() => {
+      setStatus("error");
+      setMessage(getConnectingTimeoutMessage());
+      hls?.destroy();
+    }, CONNECTING_TIMEOUT_MS);
+    const clearConnectingTimeout = () => window.clearTimeout(connectingTimeout);
+    const handlePlaying = () => {
+      clearConnectingTimeout();
+      setStatus("playing");
+    };
     const handleError = () => {
+      clearConnectingTimeout();
       setStatus("error");
       setMessage(getLiveStreamErrorMessage(sourceUrl));
     };
@@ -113,6 +129,7 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
           setMessage("Memulihkan gangguan media stream…");
           return;
         }
+        clearConnectingTimeout();
         setStatus("error");
         setMessage(getLiveStreamErrorMessage(sourceUrl));
       });
@@ -125,6 +142,7 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
     }
 
     return () => {
+      clearConnectingTimeout();
       video.pause();
       video.removeAttribute("src");
       video.load();
