@@ -1,4 +1,4 @@
-import Hls from "hls.js";
+import type Hls from "hls.js";
 import { selectHlsPlaybackMode } from "@/lib/hlsPlayback";
 import { AlertTriangle, CirclePlay, LoaderCircle, Maximize2, RotateCcw, VideoOff } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -113,35 +113,49 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
 
     video.addEventListener("playing", handlePlaying);
     video.addEventListener("error", handleError);
-    const playbackMode = selectHlsPlaybackMode(Hls.isSupported(), video.canPlayType("application/vnd.apple.mpegurl"));
+    let disposed = false;
+    const nativeHlsSupport = video.canPlayType("application/vnd.apple.mpegurl");
 
-    if (playbackMode === "hls-js") {
-      hls = new Hls({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 10 });
-      hls.loadSource(sourceUrl);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(() => setMessage("Tekan tombol mulai live untuk memulai stream."));
-      });
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (!data.fatal) return;
-        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-          hls?.recoverMediaError();
-          setMessage("Memulihkan gangguan media stream…");
-          return;
-        }
-        clearConnectingTimeout();
-        setStatus("error");
-        setMessage(getLiveStreamErrorMessage(sourceUrl));
-      });
-    } else if (playbackMode === "native") {
+    if (nativeHlsSupport) {
       video.src = sourceUrl;
       video.play().catch(() => setMessage("Tekan tombol mulai live untuk memulai stream."));
     } else {
-      setStatus("error");
-      setMessage("Peramban ini belum mendukung pemutaran HLS.");
+      void import("hls.js").then(({ default: HlsRuntime }) => {
+        if (disposed) return;
+        const playbackMode = selectHlsPlaybackMode(HlsRuntime.isSupported(), nativeHlsSupport);
+        if (playbackMode !== "hls-js") {
+          clearConnectingTimeout();
+          setStatus("error");
+          setMessage("Peramban ini belum mendukung pemutaran HLS.");
+          return;
+        }
+        hls = new HlsRuntime({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 10 });
+        hls.loadSource(sourceUrl);
+        hls.attachMedia(video);
+        hls.on(HlsRuntime.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => setMessage("Tekan tombol mulai live untuk memulai stream."));
+        });
+        hls.on(HlsRuntime.Events.ERROR, (_event, data) => {
+          if (!data.fatal) return;
+          if (data.type === HlsRuntime.ErrorTypes.MEDIA_ERROR) {
+            hls?.recoverMediaError();
+            setMessage("Memulihkan gangguan media stream…");
+            return;
+          }
+          clearConnectingTimeout();
+          setStatus("error");
+          setMessage(getLiveStreamErrorMessage(sourceUrl));
+        });
+      }).catch(() => {
+        if (disposed) return;
+        clearConnectingTimeout();
+        setStatus("error");
+        setMessage("Pemutar HLS tidak dapat dimuat. Coba sambungkan ulang.");
+      });
     }
 
     return () => {
+      disposed = true;
       clearConnectingTimeout();
       video.pause();
       video.removeAttribute("src");

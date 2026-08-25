@@ -13,10 +13,13 @@ vi.mock("@/lib/trpc", () => ({
     dataset: {
       cameras: { useQuery: () => ({ data: [], isLoading: false, isError: false, refetch: vi.fn() }) },
       snapshots: { useQuery: () => mocks.galleryState },
+      snapshotAnnotations: { useQuery: () => ({ data: [], isLoading: false, isError: false, refetch: vi.fn() }) },
+      trainingReadiness: { useQuery: () => ({ data: { classMap: ["car", "truck", "bus", "motorcycle"] }, isLoading: false, isError: false, refetch: vi.fn() }) },
     },
   },
 }));
 vi.mock("sonner", () => ({ toast: { info: vi.fn() } }));
+vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ user: { role: "admin", name: "Admin" } }) }));
 
 import DatasetGallery from "./DatasetGallery";
 

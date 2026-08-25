@@ -16,6 +16,6 @@ describe("DashboardLayout Guest", () => {
     expect(screen.getByText("Mode baca publik")).toBeTruthy();
     expect(screen.getByText("Guest · lihat saja")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Masuk sebagai admin" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Overview" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("button", { name: "Ringkasan" }).getAttribute("aria-current")).toBe("page");
   });
 });

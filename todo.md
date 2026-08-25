@@ -179,3 +179,10 @@
 - [x] Menambahkan status aksesibel untuk bahasa halaman, navigasi aktif, dan pilihan interval capture.
 - [x] Menjalankan seluruh evaluasi dalam mode baca dan uji non-destruktif tanpa mengubah konfigurasi kamera atau data snapshot.
 - [x] Menyelaraskan endpoint gallery snapshot dengan kontrak mode Guest baca-publik tanpa membuka mutasi data.
+- [x] Memverifikasi runtime build produksi secara lokal dan memastikan modul sumber tidak tersaji pada server produksi sementara.
+- [x] Menerapkan code splitting tingkat rute dan lazy loading dependensi Leaflet serta HLS untuk mengurangi JavaScript awal.
+- [x] Menambahkan kontrak database dan ekspor paket siap-training YOLO dengan split deterministik, label template, YAML, manifest, serta quality gate baca-saja.
+- [x] Menambahkan metrik availability capture 7 hari dan peringatan coverage HLS pada Overview serta detail kamera.
+- [x] Menyeragamkan istilah antarmuka utama ke Bahasa Indonesia dan meneruskan filter Gallery ke halaman Ekspor.
+- [x] Mencatat audit ekspor secara persisten dan menyediakan konfigurasi kebijakan retensi tanpa menjalankan penghapusan snapshot otomatis.
+- [x] Menambahkan regresi, menjalankan validasi penuh, serta memperbarui README dan handover deployment untuk pengembangan ini.

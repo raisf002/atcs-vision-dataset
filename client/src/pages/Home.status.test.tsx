@@ -27,6 +27,8 @@ vi.mock("@/lib/trpc", () => ({
       overview: { useQuery: () => mocks.overview },
       dailyStats: { useQuery: () => ({ data: [], isLoading: false, isError: false }) },
       cameraStats: { useQuery: () => ({ data: [], isLoading: false, isError: false }) },
+      availability: { useQuery: () => ({ data: [{ cameraId: "hls", successfulCaptures: 0, hlsTransientFailures: 1, pipelineFailures: 0, attempts: 1, availabilityPercent: 0, coverageStatus: "degraded" }], isLoading: false, isError: false }) },
+      trainingReadiness: { useQuery: () => ({ data: { totalSnapshots: 0, approvedAnnotations: 0, pendingAnnotations: 0, invalidAnnotations: 0, classMap: ["car"] }, isLoading: false, isError: false }) },
     },
   },
 }));

@@ -41,6 +41,17 @@ export const captureSettings = mysqlTable("captureSettings", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+/** Dataset-wide policy. Retention is configuration-only until an explicit cleanup workflow is approved. */
+export const datasetSettings = mysqlTable("datasetSettings", {
+  id: int("id").primaryKey(),
+  classMapJson: text("classMapJson").notNull(),
+  retentionDays: int("retentionDays").default(365).notNull(),
+  retentionEnabled: boolean("retentionEnabled").default(false).notNull(),
+  updatedByUserId: int("updatedByUserId").references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const snapshots = mysqlTable("snapshots", {
   id: int("id").autoincrement().primaryKey(),
   cameraId: varchar("cameraId", { length: 96 }).notNull().references(() => cameras.id),
@@ -52,6 +63,16 @@ export const snapshots = mysqlTable("snapshots", {
   height: int("height"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => [index("snapshots_camera_captured_idx").on(table.cameraId, table.capturedAt), index("snapshots_captured_idx").on(table.capturedAt)]);
+
+/** One canonical YOLO annotation per snapshot; annotation text is written by an admin and never alters image metadata. */
+export const snapshotAnnotations = mysqlTable("snapshotAnnotations", {
+  snapshotId: int("snapshotId").primaryKey().references(() => snapshots.id),
+  yoloText: text("yoloText").notNull(),
+  status: mysqlEnum("status", ["draft", "approved", "rejected"]).default("draft").notNull(),
+  updatedByUserId: int("updatedByUserId").references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [index("snapshot_annotations_status_updated_idx").on(table.status, table.updatedAt)]);
 
 export const captureErrors = mysqlTable("captureErrors", {
   id: int("id").autoincrement().primaryKey(),
@@ -102,13 +123,19 @@ export const datasetExports = mysqlTable("datasetExports", {
   fileCount: int("fileCount").default(0).notNull(),
   archiveStorageKey: varchar("archiveStorageKey", { length: 512 }),
   errorMessage: text("errorMessage"),
+  exportMode: mysqlEnum("exportMode", ["raw", "training"]).default("raw").notNull(),
+  filtersJson: text("filtersJson"),
+  manifestJson: text("manifestJson"),
+  qualitySummaryJson: text("qualitySummaryJson"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   completedAt: timestamp("completedAt"),
-}, (table) => [index("dataset_exports_user_created_idx").on(table.requestedByUserId, table.createdAt)]);
+}, (table) => [index("dataset_exports_user_created_idx").on(table.requestedByUserId, table.createdAt), index("dataset_exports_mode_created_idx").on(table.exportMode, table.createdAt)]);
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Camera = typeof cameras.$inferSelect;
 export type Snapshot = typeof snapshots.$inferSelect;
+export type SnapshotAnnotation = typeof snapshotAnnotations.$inferSelect;
+export type DatasetSettings = typeof datasetSettings.$inferSelect;
 export type VisionModel = typeof visionModels.$inferSelect;
 export type CameraCountingConfig = typeof cameraCountingConfigs.$inferSelect;

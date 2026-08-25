@@ -43,6 +43,13 @@
       "when": 1786956582101,
       "tag": "0005_ambitious_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1787631007476,
+      "tag": "0006_milky_ronan",
+      "breakpoints": true
     }
   ]
 }

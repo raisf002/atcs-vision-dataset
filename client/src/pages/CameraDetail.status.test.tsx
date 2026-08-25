@@ -28,6 +28,7 @@ vi.mock("@/lib/trpc", () => ({
   trpc: {
     dataset: {
       cameras: { useQuery: () => ({ data: mocks.camera ? [mocks.camera] : [], isLoading: false, refetch: vi.fn() }) },
+      availability: { useQuery: () => ({ data: [{ cameraId: "cimulu", successfulCaptures: 1, hlsTransientFailures: 1, pipelineFailures: 0, attempts: 2, availabilityPercent: 50, coverageStatus: "degraded" }], isLoading: false, isError: false }) },
       updateCamera: { useMutation: () => ({ isPending: false, mutate: mocks.mutate }) },
     },
   },
@@ -83,7 +84,7 @@ describe("Camera detail failure diagnostics", () => {
     render(<CameraDetail />);
 
     expect(screen.getByText("Pipeline worker gagal")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Tinjau registry" }).getAttribute("href")).toBe("/cameras");
+    expect(screen.getByRole("link", { name: "Tinjau registri" }).getAttribute("href")).toBe("/cameras");
   });
 
   it("does not show recovery alerts for a successful latest capture", () => {

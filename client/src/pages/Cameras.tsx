@@ -68,8 +68,8 @@ export default function Cameras() {
   return (
     <div className="mx-auto w-full max-w-[1500px] space-y-7">
       <PageHeader
-        eyebrow="Registry · 29 cameras"
-        title="Camera registry"
+        eyebrow="Registri · 29 kamera"
+        title="Registri Kamera"
         description="Kelola sumber HLS, status aktif, interval, dan identitas penyimpanan dari setiap titik CCTV ATCS Tasikmalaya."
         actions={<Button onClick={() => toast.info("Jumlah registry dikunci tepat 29 kamera ATCS.")} className="rounded-xl bg-stone-900 text-white hover:bg-stone-800"><Camera className="mr-2 h-4 w-4" />29 kamera tetap</Button>}
       />
@@ -77,7 +77,7 @@ export default function Cameras() {
       <section className="grid gap-4 rounded-[1.35rem] border border-amber-200 bg-amber-50/70 p-5 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
           <p className="text-sm font-semibold text-amber-950">Konfigurasi sumber per CCTV</p>
-          <p className="mt-1 text-sm leading-6 text-amber-800">{configuredSources} URL HLS telah dipetakan dari konfigurasi live streaming publik. Klik satu baris CCTV untuk menguji live view serta menetapkan interval dan capture state individual.</p>
+          <p className="mt-1 text-sm leading-6 text-amber-800">{configuredSources} URL HLS telah dipetakan dari konfigurasi live streaming publik. Klik satu baris CCTV untuk menguji tampilan live serta menetapkan interval dan status capture individual.</p>
         </div>
         <div className="rounded-xl border border-amber-200 bg-white/70 px-4 py-3 text-right"><p className="text-2xl font-semibold tracking-tight text-amber-950">{configuredSources} / 29</p><p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">sumber terkonfigurasi</p></div>
       </section>
