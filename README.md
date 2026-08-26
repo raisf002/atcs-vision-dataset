@@ -85,7 +85,7 @@ Timer systemd **tidak boleh** diaktifkan sebelum sumber HLS, token, snapshot has
 | `Pipeline worker gagal` | Worker/ingest/upload mengalami kegagalan setelah frame diperoleh atau diproses. | Buka registry, periksa error log dan log service worker. |
 | `Berhasil` | Snapshot sudah tersimpan dan metadata tercatat. | Tidak perlu tindakan. |
 
-Pemutar live memiliki batas waktu CONNECTING 15 detik. Jika stream tidak mulai memutar, UI berubah ke error yang dapat ditindaklanjuti dan menyediakan retry tanpa mengubah konfigurasi kamera.
+Pemutar live memiliki batas waktu CONNECTING 15 detik. Jika stream tidak mulai memutar atau koneksi terputus, pemutar mencoba ulang otomatis hingga tiga kali dengan jeda 2, 4, dan 8 detik. Status percobaan ditampilkan di atas video; tombol retry manual baru diperlukan apabila batas otomatis tersebut habis. Mekanisme ini tidak mengubah konfigurasi kamera maupun mengaktifkan capture.
 
 ## Keamanan operasional
 
