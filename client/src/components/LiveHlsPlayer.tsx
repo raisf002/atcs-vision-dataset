@@ -19,9 +19,20 @@ export function getLiveStreamErrorMessage(sourceUrl: string | null) {
 }
 
 export const CONNECTING_TIMEOUT_MS = 15_000;
+export const AUTO_RETRY_DELAYS_MS = [2_000, 4_000, 8_000] as const;
 
 export function getConnectingTimeoutMessage() {
   return "Stream belum mulai memutar. Coba sambungkan ulang; bila tetap gagal, periksa status sumber HLS kamera ini.";
+}
+
+export function getAutomaticRetryDelayMs(attempt: number) {
+  return AUTO_RETRY_DELAYS_MS[attempt - 1] ?? null;
+}
+
+export function getAutomaticRetryMessage(attempt: number) {
+  const delayMs = getAutomaticRetryDelayMs(attempt);
+  if (delayMs === null) return "Sumber HLS masih belum merespons setelah percobaan otomatis. Gunakan tombol sambungkan ulang untuk mencoba kembali secara manual.";
+  return `Sumber belum merespons. Mencoba sambungkan ulang otomatis (${attempt}/${AUTO_RETRY_DELAYS_MS.length}) dalam ${delayMs / 1_000} detik…`;
 }
 
 type LiveHlsPlayerProps = {
@@ -39,6 +50,9 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
   const [message, setMessage] = useState("Menyiapkan stream live…");
   const [overlayBox, setOverlayBox] = useState<VideoContentBox | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [automaticRetryAttempt, setAutomaticRetryAttempt] = useState(0);
+  const automaticRetryTimerRef = useRef<number | null>(null);
+  const automaticRetryAttemptRef = useRef(0);
 
   const updateOverlayBox = useCallback(() => {
     const frame = playerFrameRef.current;
@@ -50,13 +64,44 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
   }, []);
 
   const setOverlaySlot = useCallback((element: HTMLDivElement | null) => onOverlaySlotChange?.(element), [onOverlaySlotChange]);
+  const clearAutomaticRetry = useCallback(() => {
+    if (automaticRetryTimerRef.current !== null) window.clearTimeout(automaticRetryTimerRef.current);
+    automaticRetryTimerRef.current = null;
+  }, []);
+  const resetAutomaticRetry = useCallback(() => {
+    clearAutomaticRetry();
+    automaticRetryAttemptRef.current = 0;
+    setAutomaticRetryAttempt(0);
+  }, [clearAutomaticRetry]);
+  const scheduleAutomaticRetry = useCallback(() => {
+    const nextAttempt = automaticRetryAttemptRef.current + 1;
+    const delayMs = getAutomaticRetryDelayMs(nextAttempt);
+    if (delayMs === null) {
+      clearAutomaticRetry();
+      setStatus("error");
+      setMessage(getAutomaticRetryMessage(nextAttempt));
+      return false;
+    }
+    automaticRetryAttemptRef.current = nextAttempt;
+    setAutomaticRetryAttempt(nextAttempt);
+    setStatus("loading");
+    setMessage(getAutomaticRetryMessage(nextAttempt));
+    clearAutomaticRetry();
+    automaticRetryTimerRef.current = window.setTimeout(() => {
+      automaticRetryTimerRef.current = null;
+      setRetryKey((value) => value + 1);
+    }, delayMs);
+    return true;
+  }, [clearAutomaticRetry]);
   const retryPlayback = useCallback(() => {
+    resetAutomaticRetry();
     setStatus("loading");
     setMessage("Menyambungkan ulang ke stream live…");
     setRetryKey((value) => value + 1);
-  }, []);
+  }, [resetAutomaticRetry]);
 
   useEffect(() => onPlaybackStatusChange?.(status), [onPlaybackStatusChange, status]);
+  useEffect(() => () => clearAutomaticRetry(), [clearAutomaticRetry, sourceUrl]);
 
   useEffect(() => {
     const frame = playerFrameRef.current;
@@ -93,22 +138,25 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
     }
 
     setStatus("loading");
-    setMessage("Menyiapkan stream live…");
+    setMessage(automaticRetryAttempt ? `Menyambungkan ulang ke stream live (otomatis ${automaticRetryAttempt}/${AUTO_RETRY_DELAYS_MS.length})…` : "Menyiapkan stream live…");
     let hls: Hls | undefined;
-    const connectingTimeout = window.setTimeout(() => {
-      setStatus("error");
-      setMessage(getConnectingTimeoutMessage());
+    const retryAfterFailure = () => {
+      clearConnectingTimeout();
       hls?.destroy();
+      scheduleAutomaticRetry();
+    };
+    const connectingTimeout = window.setTimeout(() => {
+      retryAfterFailure();
     }, CONNECTING_TIMEOUT_MS);
     const clearConnectingTimeout = () => window.clearTimeout(connectingTimeout);
     const handlePlaying = () => {
       clearConnectingTimeout();
+      resetAutomaticRetry();
       setStatus("playing");
     };
     const handleError = () => {
       clearConnectingTimeout();
-      setStatus("error");
-      setMessage(getLiveStreamErrorMessage(sourceUrl));
+      retryAfterFailure();
     };
 
     video.addEventListener("playing", handlePlaying);
@@ -118,7 +166,7 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
 
     if (nativeHlsSupport) {
       video.src = sourceUrl;
-      video.play().catch(() => setMessage("Tekan tombol mulai live untuk memulai stream."));
+      video.play().catch(() => scheduleAutomaticRetry());
     } else {
       void import("hls.js").then(({ default: HlsRuntime }) => {
         if (disposed) return;
@@ -133,7 +181,7 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
         hls.loadSource(sourceUrl);
         hls.attachMedia(video);
         hls.on(HlsRuntime.Events.MANIFEST_PARSED, () => {
-          video.play().catch(() => setMessage("Tekan tombol mulai live untuk memulai stream."));
+          video.play().catch(() => scheduleAutomaticRetry());
         });
         hls.on(HlsRuntime.Events.ERROR, (_event, data) => {
           if (!data.fatal) return;
@@ -142,15 +190,11 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
             setMessage("Memulihkan gangguan media stream…");
             return;
           }
-          clearConnectingTimeout();
-          setStatus("error");
-          setMessage(getLiveStreamErrorMessage(sourceUrl));
+          retryAfterFailure();
         });
       }).catch(() => {
         if (disposed) return;
-        clearConnectingTimeout();
-        setStatus("error");
-        setMessage("Pemutar HLS tidak dapat dimuat. Coba sambungkan ulang.");
+        retryAfterFailure();
       });
     }
 
@@ -164,14 +208,14 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
       video.removeEventListener("error", handleError);
       hls?.destroy();
     };
-  }, [sourceUrl, retryKey]);
+  }, [sourceUrl, retryKey, automaticRetryAttempt, resetAutomaticRetry, scheduleAutomaticRetry]);
 
   return <div className="overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#0e211d] shadow-[0_24px_55px_-32px_rgba(8,31,26,0.7)]">
     <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-white"><div className="flex min-w-0 items-center gap-2"><span className={`h-2 w-2 rounded-full ${status === "playing" ? "bg-lime-300 shadow-[0_0_0_4px_rgba(190,242,100,0.12)]" : status === "error" ? "bg-orange-400" : status === "empty" ? "bg-stone-500" : "bg-amber-300"}`} /><span className="truncate text-xs font-semibold">{status === "playing" ? "LIVE" : status === "error" ? "STREAM ERROR" : status === "empty" ? "NO SOURCE" : "CONNECTING"}</span></div><span className="font-mono text-[10px] text-stone-400">HLS · live view</span></div>
     <div ref={playerFrameRef} className="relative aspect-video bg-black">
       {sourceUrl ? <video ref={videoRef} controls playsInline muted className="h-full w-full object-contain" aria-label={`Video live ${cameraName}`} /> : null}
       {overlaySlotId ? <div ref={setOverlaySlot} id={overlaySlotId} className="pointer-events-none absolute z-20" style={overlayBox ? { left: overlayBox.left, top: overlayBox.top, width: overlayBox.width, height: overlayBox.height } : { inset: 0 }} /> : null}
-      {status !== "playing" ? <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0e211d]/85 px-6 text-center text-white">{status === "loading" ? <LoaderCircle className="h-7 w-7 animate-spin text-lime-300" /> : status === "error" ? <AlertTriangle className="h-7 w-7 text-orange-300" /> : <VideoOff className="h-7 w-7 text-stone-400" />}<p className="mt-3 max-w-sm text-sm font-medium">{message}</p>{status === "loading" ? <p className="mt-1 text-xs text-stone-400">Menyambungkan ke kamera publik…</p> : null}{sourceUrl ? status === "error" ? <button type="button" onClick={retryPlayback} className="mt-4 inline-flex h-9 items-center rounded-lg bg-lime-300 px-3.5 text-xs font-semibold text-lime-950 transition-colors hover:bg-lime-200"><RotateCcw className="mr-1.5 h-3.5 w-3.5" />Coba sambungkan ulang</button> : <button type="button" onClick={startPlayback} className="mt-4 inline-flex h-9 items-center rounded-lg bg-lime-300 px-3.5 text-xs font-semibold text-lime-950 transition-colors hover:bg-lime-200"><CirclePlay className="mr-1.5 h-3.5 w-3.5" />Mulai live</button> : null}</div> : null}
+      {status !== "playing" ? <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0e211d]/85 px-6 text-center text-white">{status === "loading" ? <LoaderCircle className="h-7 w-7 animate-spin text-lime-300" /> : status === "error" ? <AlertTriangle className="h-7 w-7 text-orange-300" /> : <VideoOff className="h-7 w-7 text-stone-400" />}<p className="mt-3 max-w-sm text-sm font-medium">{message}</p>{status === "loading" ? <p className="mt-1 text-xs text-stone-400">{automaticRetryAttempt ? "Sambungan akan dicoba kembali secara otomatis." : "Menyambungkan ke kamera publik…"}</p> : null}{sourceUrl ? status === "error" ? <button type="button" onClick={retryPlayback} className="mt-4 inline-flex h-9 items-center rounded-lg bg-lime-300 px-3.5 text-xs font-semibold text-lime-950 transition-colors hover:bg-lime-200"><RotateCcw className="mr-1.5 h-3.5 w-3.5" />Coba sambungkan ulang</button> : automaticRetryAttempt === 0 ? <button type="button" onClick={startPlayback} className="mt-4 inline-flex h-9 items-center rounded-lg bg-lime-300 px-3.5 text-xs font-semibold text-lime-950 transition-colors hover:bg-lime-200"><CirclePlay className="mr-1.5 h-3.5 w-3.5" />Mulai live</button> : null : null}</div> : null}
       {status === "playing" ? <span className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/45 px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-lime-200 backdrop-blur"><CirclePlay className="h-3 w-3" />LIVE</span> : null}
     </div>
     <div className="flex items-center justify-between px-4 py-3 text-xs text-stone-400"><span className="truncate pr-4">{sourceUrl ?? "URL stream belum dikonfigurasi"}</span><Maximize2 className="h-3.5 w-3.5 shrink-0" /></div>

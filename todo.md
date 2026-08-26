@@ -186,3 +186,4 @@
 - [x] Menyeragamkan istilah antarmuka utama ke Bahasa Indonesia dan meneruskan filter Gallery ke halaman Ekspor.
 - [x] Mencatat audit ekspor secara persisten dan menyediakan konfigurasi kebijakan retensi tanpa menjalankan penghapusan snapshot otomatis.
 - [x] Menambahkan regresi, menjalankan validasi penuh, serta memperbarui README dan handover deployment untuk pengembangan ini.
+- [x] Menambahkan retry HLS otomatis dengan backoff terbatas, status percobaan yang jelas, dan regresi tanpa mengaktifkan capture atau mengubah konfigurasi kamera.

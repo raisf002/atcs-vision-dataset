@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CONNECTING_TIMEOUT_MS, getConnectingTimeoutMessage, getLiveStreamErrorMessage, getObjectContainBox } from "./LiveHlsPlayer";
+import { AUTO_RETRY_DELAYS_MS, CONNECTING_TIMEOUT_MS, getAutomaticRetryDelayMs, getAutomaticRetryMessage, getConnectingTimeoutMessage, getLiveStreamErrorMessage, getObjectContainBox } from "./LiveHlsPlayer";
 
 describe("getObjectContainBox", () => {
   it("menempatkan overlay pada area video nyata ketika stream diberi letterbox", () => {
@@ -18,5 +18,15 @@ describe("getObjectContainBox", () => {
   it("menetapkan batas waktu CONNECTING dan pesan pemulihan yang dapat ditindaklanjuti", () => {
     expect(CONNECTING_TIMEOUT_MS).toBe(15_000);
     expect(getConnectingTimeoutMessage()).toContain("Coba sambungkan ulang");
+  });
+
+  it("menjadwalkan tiga retry otomatis dengan backoff terbatas sebelum meminta tindakan manual", () => {
+    expect(AUTO_RETRY_DELAYS_MS).toEqual([2_000, 4_000, 8_000]);
+    expect(getAutomaticRetryDelayMs(1)).toBe(2_000);
+    expect(getAutomaticRetryDelayMs(2)).toBe(4_000);
+    expect(getAutomaticRetryDelayMs(3)).toBe(8_000);
+    expect(getAutomaticRetryDelayMs(4)).toBeNull();
+    expect(getAutomaticRetryMessage(2)).toContain("(2/3)");
+    expect(getAutomaticRetryMessage(4)).toContain("manual");
   });
 });
