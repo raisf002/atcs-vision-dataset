@@ -208,7 +208,7 @@ export default function LiveHlsPlayer({ sourceUrl, cameraName, onPlaybackStatusC
       video.removeEventListener("error", handleError);
       hls?.destroy();
     };
-  }, [sourceUrl, retryKey, automaticRetryAttempt, resetAutomaticRetry, scheduleAutomaticRetry]);
+  }, [sourceUrl, retryKey, resetAutomaticRetry, scheduleAutomaticRetry]);
 
   return <div className="overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#0e211d] shadow-[0_24px_55px_-32px_rgba(8,31,26,0.7)]">
     <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-white"><div className="flex min-w-0 items-center gap-2"><span className={`h-2 w-2 rounded-full ${status === "playing" ? "bg-lime-300 shadow-[0_0_0_4px_rgba(190,242,100,0.12)]" : status === "error" ? "bg-orange-400" : status === "empty" ? "bg-stone-500" : "bg-amber-300"}`} /><span className="truncate text-xs font-semibold">{status === "playing" ? "LIVE" : status === "error" ? "STREAM ERROR" : status === "empty" ? "NO SOURCE" : "CONNECTING"}</span></div><span className="font-mono text-[10px] text-stone-400">HLS · live view</span></div>
