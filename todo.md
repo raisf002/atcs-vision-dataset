@@ -187,3 +187,7 @@
 - [x] Mencatat audit ekspor secara persisten dan menyediakan konfigurasi kebijakan retensi tanpa menjalankan penghapusan snapshot otomatis.
 - [x] Menambahkan regresi, menjalankan validasi penuh, serta memperbarui README dan handover deployment untuk pengembangan ini.
 - [x] Menambahkan retry HLS otomatis dengan backoff terbatas, status percobaan yang jelas, dan regresi tanpa mengaktifkan capture atau mengubah konfigurasi kamera.
+- [ ] Memeriksa akses GitHub dan menetapkan target repositori untuk publikasi source proyek.
+- [ ] Menyiapkan source tree aman tanpa secrets, database, snapshot, atau storage privat.
+- [ ] Mempublikasikan repositori GitHub dan memverifikasi kelengkapan file aplikasi, migration, worker, dan dokumentasi.
+- [ ] Membandingkan isi repo GitHub dengan ZIP workspace serta melaporkan perbedaannya.
